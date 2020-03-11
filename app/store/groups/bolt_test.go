@@ -190,7 +190,7 @@ func TestBoltDB_DeleteGroup(t *testing.T) {
 		assert.Nil(t, q)
 		return nil
 	})
-
+	require.NoError(t, err)
 }
 
 func TestBoltDB_AddUser(t *testing.T) {

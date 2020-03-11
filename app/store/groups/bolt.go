@@ -261,7 +261,7 @@ func unique(sl []string) []string {
 		m[s] = struct{}{}
 	}
 	var res []string
-	for s, _ := range m {
+	for s := range m {
 		res = append(res, s)
 	}
 	return res
