@@ -255,8 +255,37 @@ func TestGroupBot_FailedAuth(t *testing.T) {
 		Text: "/delete_user_from_group @some_students @blah",
 	})
 	assert.Equal(t, nil, resp)
+
+	resp = b.OnMessage(Message{
+		From: User{
+			Username:    "blah",
+			DisplayName: "blahblah",
+			IsAdmin:     false,
+		},
+		Text: "/add_user_to_group @some_students @blah",
+	})
+	assert.Equal(t, nil, resp)
 }
 
 func TestGroupBot_AddUser(t *testing.T) {
-	panic("todo")
+	mockGroupStore := groups.MockStore{}
+	mockGroupStore.On(
+		"AddUser",
+		"foo",
+		"bar",
+		mock.Anything,
+	).Return(nil)
+	var storeInterface groups.Store = &mockGroupStore
+	b := NewGroupBot(&storeInterface)
+
+	resp := b.OnMessage(Message{
+		From: User{
+			Username:    "blah",
+			DisplayName: "blahblah",
+			IsAdmin:     true,
+		},
+		Text: "/add_user_to_group @some_students @blah",
+	})
+
+	assert.Equal(t, "User @blah has been successfully added to the group @some_students", resp.Text)
 }
