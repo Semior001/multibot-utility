@@ -22,7 +22,7 @@ func TestGroupBot_Help(t *testing.T) {
 @<group alias> - triggers bot to send message with all participants of the group`, (&GroupBot{}).Help())
 }
 
-func TestGroupBot_Add(t *testing.T) {
+func TestGroupBot_AddGroup(t *testing.T) {
 	mockGroupStore := groups.MockStore{}
 	mockGroupStore.On(
 		"PutGroup",
@@ -31,9 +31,7 @@ func TestGroupBot_Add(t *testing.T) {
 		mock.Anything,
 	).Return(nil)
 
-	var storeInterface groups.Store = &mockGroupStore
-
-	b := NewGroupBot(&storeInterface)
+	b := NewGroupBot(&mockGroupStore)
 
 	resp := b.OnMessage(Message{
 		From: User{
@@ -47,7 +45,7 @@ func TestGroupBot_Add(t *testing.T) {
 	assert.Equal(t, "Group @admins has been successfully added", resp.Text)
 }
 
-func TestGroupBot_List(t *testing.T) {
+func TestGroupBot_ListGroups(t *testing.T) {
 	mockGroupStore := groups.MockStore{}
 	mockGroupStore.On(
 		"PutGroup",
@@ -71,9 +69,7 @@ func TestGroupBot_List(t *testing.T) {
 		"@admins_9": {"@test", "@test1", "@test2", "@test3"},
 	}, nil)
 
-	var storeInterface groups.Store = &mockGroupStore
-
-	b := NewGroupBot(&storeInterface)
+	b := NewGroupBot(&mockGroupStore)
 
 	for i := 0; i < 10; i++ {
 		b.OnMessage(Message{
@@ -90,16 +86,9 @@ func TestGroupBot_List(t *testing.T) {
 		Text: "/list_groups",
 	})
 
-	assert.Equal(t, `@admins_0 : @test, @test1, @test2, @test3
-@admins_1 : @test, @test1, @test2, @test3
-@admins_2 : @test, @test1, @test2, @test3
-@admins_3 : @test, @test1, @test2, @test3
-@admins_4 : @test, @test1, @test2, @test3
-@admins_5 : @test, @test1, @test2, @test3
-@admins_6 : @test, @test1, @test2, @test3
-@admins_7 : @test, @test1, @test2, @test3
-@admins_8 : @test, @test1, @test2, @test3
-@admins_9 : @test, @test1, @test2, @test3`, resp.Text)
+	for i := 0; i < 10; i++ {
+		assert.Contains(t, resp.Text, fmt.Sprintf("@admins_%d : @test, @test1, @test2, @test3", i))
+	}
 }
 
 func TestGroupBot_DeleteUserFromGroup(t *testing.T) {
@@ -117,9 +106,7 @@ func TestGroupBot_DeleteUserFromGroup(t *testing.T) {
 		mock.Anything,
 	).Return(nil)
 
-	var storeInterface groups.Store = &mockGroupStore
-
-	b := NewGroupBot(&storeInterface)
+	b := NewGroupBot(&mockGroupStore)
 
 	b.OnMessage(Message{
 		From: User{
@@ -155,10 +142,12 @@ func TestGroupBot_DeleteGroup(t *testing.T) {
 		mock.Anything,
 		mock.Anything,
 	).Return(nil)
+	mockGroupStore.On(
+		"GetGroups",
+		mock.Anything,
+	).Return(map[string][]string{}, nil)
 
-	var storeInterface groups.Store = &mockGroupStore
-
-	b := NewGroupBot(&storeInterface)
+	b := NewGroupBot(&mockGroupStore)
 
 	b.OnMessage(Message{
 		From: User{
@@ -185,98 +174,15 @@ func TestGroupBot_DeleteGroup(t *testing.T) {
 	assert.Equal(t, "There's no groups in this chat yet", resp.Text)
 }
 
-func TestGroupBot_TestTrigger(t *testing.T) {
-	mockGroupStore := groups.MockStore{}
-	mockGroupStore.On(
-		"PutGroup",
-		mock.Anything,
-		mock.Anything,
-		mock.Anything,
-	).Return(nil)
-	mockGroupStore.On(
-		"GetGroup",
-		"@some_students",
-	).Return([]string{
-		"@blah",
-		"@blah1",
-		"@blah2",
-	}, nil)
-
-	var storeInterface groups.Store = &mockGroupStore
-
-	b := NewGroupBot(&storeInterface)
-
-	b.OnMessage(Message{
-		From: User{
-			Username:    "blah",
-			DisplayName: "blahblah",
-			IsAdmin:     true,
-		},
-		Text: "/add_group @some_students @blah @blah1 @blah2",
-	})
-
-	resp := b.OnMessage(Message{
-		Text: "There is a reference to @some_students",
-	})
-	assert.Equal(t, "@blah @blah1 @blah2", resp.Text)
-}
-
-func TestGroupBot_FailedAuth(t *testing.T) {
-	mockGroupStore := groups.MockStore{}
-	var storeInterface groups.Store = &mockGroupStore
-	b := NewGroupBot(&storeInterface)
-
-	resp := b.OnMessage(Message{
-		From: User{
-			Username:    "blah",
-			DisplayName: "blahblah",
-			IsAdmin:     false,
-		},
-		Text: "/add_group @some_students @blah @blah1 @blah2",
-	})
-	assert.Equal(t, nil, resp)
-
-	resp = b.OnMessage(Message{
-		From: User{
-			Username:    "blah",
-			DisplayName: "blahblah",
-			IsAdmin:     false,
-		},
-		Text: "/delete_group @some_students",
-	})
-	assert.Equal(t, nil, resp)
-
-	resp = b.OnMessage(Message{
-		From: User{
-			Username:    "blah",
-			DisplayName: "blahblah",
-			IsAdmin:     false,
-		},
-		Text: "/delete_user_from_group @some_students @blah",
-	})
-	assert.Equal(t, nil, resp)
-
-	resp = b.OnMessage(Message{
-		From: User{
-			Username:    "blah",
-			DisplayName: "blahblah",
-			IsAdmin:     false,
-		},
-		Text: "/add_user_to_group @some_students @blah",
-	})
-	assert.Equal(t, nil, resp)
-}
-
 func TestGroupBot_AddUser(t *testing.T) {
 	mockGroupStore := groups.MockStore{}
 	mockGroupStore.On(
 		"AddUser",
-		"foo",
-		"bar",
-		mock.Anything,
+		"",
+		"@some_students",
+		"@blah",
 	).Return(nil)
-	var storeInterface groups.Store = &mockGroupStore
-	b := NewGroupBot(&storeInterface)
+	b := NewGroupBot(&mockGroupStore)
 
 	resp := b.OnMessage(Message{
 		From: User{
@@ -288,4 +194,119 @@ func TestGroupBot_AddUser(t *testing.T) {
 	})
 
 	assert.Equal(t, "User @blah has been successfully added to the group @some_students", resp.Text)
+}
+
+func TestGroupBot_FailedAuth(t *testing.T) {
+	mockGroupStore := groups.MockStore{}
+	b := NewGroupBot(&mockGroupStore)
+
+	resp := b.OnMessage(Message{
+		From: User{
+			Username:    "blah",
+			DisplayName: "blahblah",
+			IsAdmin:     false,
+		},
+		Text: "/add_group @some_students @blah @blah1 @blah2",
+	})
+	assert.Equal(t, (*Response)(nil), resp)
+
+	resp = b.OnMessage(Message{
+		From: User{
+			Username:    "blah",
+			DisplayName: "blahblah",
+			IsAdmin:     false,
+		},
+		Text: "/delete_group @some_students",
+	})
+	assert.Equal(t, (*Response)(nil), resp)
+
+	resp = b.OnMessage(Message{
+		From: User{
+			Username:    "blah",
+			DisplayName: "blahblah",
+			IsAdmin:     false,
+		},
+		Text: "/delete_user_from_group @some_students @blah",
+	})
+	assert.Equal(t, (*Response)(nil), resp)
+
+	resp = b.OnMessage(Message{
+		From: User{
+			Username:    "blah",
+			DisplayName: "blahblah",
+			IsAdmin:     false,
+		},
+		Text: "/add_user_to_group @some_students @blah",
+	})
+	assert.Equal(t, (*Response)(nil), resp)
+}
+
+func TestGroupBot_TestTrigger(t *testing.T) {
+	mockGroupStore := groups.MockStore{}
+	mockGroupStore.On(
+		"PutGroup",
+		mock.Anything,
+		mock.Anything,
+		mock.Anything,
+	).Return(nil)
+	mockGroupStore.On(
+		"FindAliases",
+		mock.Anything, []string{"@some_students", "@kek"},
+	).Return([]string{"@blah", "@blah1", "@blah2", "@blah3", "@blah4"}, nil)
+
+	b := NewGroupBot(&mockGroupStore)
+
+	b.OnMessage(Message{
+		From: User{
+			Username:    "blah",
+			DisplayName: "blahblah",
+			IsAdmin:     true,
+		},
+		Text: "/add_group @some_students @blah @blah1 @blah2",
+	})
+
+	b.OnMessage(Message{
+		From: User{
+			Username:    "blah",
+			DisplayName: "blahblah",
+			IsAdmin:     true,
+		},
+		Text: "/add_group @kek @blah @blah3 @blah4",
+	})
+
+	b.OnMessage(Message{
+		From: User{
+			Username:    "blah",
+			DisplayName: "blahblah",
+			IsAdmin:     true,
+		},
+		Text: "/add_group @lol @blah5 @blah6 @blah7",
+	})
+
+	resp := b.OnMessage(Message{
+		Text: "There is a reference to @some_students and @kek",
+	})
+
+	assert.Contains(t, resp.Text, "@blah")
+	assert.Contains(t, resp.Text, "@blah1")
+	assert.Contains(t, resp.Text, "@blah2")
+	assert.Contains(t, resp.Text, "@blah3")
+	assert.Contains(t, resp.Text, "@blah4")
+	assert.NotContains(t, resp.Text, "@blah5")
+	assert.NotContains(t, resp.Text, "@blah6")
+	assert.NotContains(t, resp.Text, "@blah7")
+}
+
+func TestGroupBot_Unique(t *testing.T) {
+	queried := unique([]string{"@blah", "@blah1", "@blah", "@blah1", "@blah3"})
+	m := make(map[string]int)
+	for _, s := range queried {
+		if _, ok := m[s]; !ok {
+			m[s] = 0
+		}
+		m[s]++
+	}
+	for _, cnt := range m {
+		assert.Equal(t, cnt, 1)
+	}
 }

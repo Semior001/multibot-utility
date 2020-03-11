@@ -21,15 +21,15 @@ type Message struct {
 
 // Response describes bot's answer on particular message
 type Response struct {
-	Text        string
+	Text        string        // text of the message
 	Pin         bool          // enable pin
 	Preview     bool          // enable web preview
+	ReplyTo     *Message      // message that we have to reply to, might be nil, if caused by other action
 	BanInterval time.Duration // bot banning user set the interval
 }
 
 // Bot describes a particular bot, that reacts on messages and sends whatever
 type Bot interface {
 	OnMessage(msg Message) *Response // nil if nothing to send
-	ReactsOn() []string              // reacts on returns the list of messages that will trigger the
 	Help() string                    // returns help message - how to use this bot
 }

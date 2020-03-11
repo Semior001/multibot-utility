@@ -235,6 +235,72 @@ func TestBoltDB_AddUser(t *testing.T) {
 	require.NoError(t, err)
 }
 
+func TestBoltDB_FindAliases(t *testing.T) {
+	svc := prepareBoltDB(t)
+
+	users := []string{"@blah", "@blah1", "@blah2"}
+	usersA := []string{"@blahA", "@blah1A", "@blah2A"}
+	usersC := []string{"@blahC", "@blah1C", "@blah2C"}
+
+	err := svc.db.Update(func(tx *bolt.Tx) error {
+		bkt := tx.Bucket([]byte(groupBotBktName))
+		assert.NotNil(t, bkt)
+
+		chatBkt, err := bkt.CreateBucket([]byte("foo"))
+		require.NoError(t, err)
+		assert.NotNil(t, chatBkt)
+
+		j, err := json.Marshal(users)
+		require.NoError(t, err)
+
+		err = chatBkt.Put([]byte("@users"), j)
+		require.NoError(t, err)
+
+		j, err = json.Marshal(usersA)
+		require.NoError(t, err)
+
+		err = chatBkt.Put([]byte("@usersA"), j)
+		require.NoError(t, err)
+
+		j, err = json.Marshal(usersC)
+		require.NoError(t, err)
+
+		err = chatBkt.Put([]byte("@usersC"), j)
+		require.NoError(t, err)
+		return nil
+	})
+	require.NoError(t, err)
+
+	queried, err := svc.FindAliases("foo", []string{"@usersA", "@usersC"})
+	require.NoError(t, err)
+
+	for _, u := range usersA {
+		assert.Contains(t, queried, u)
+	}
+
+	for _, u := range usersC {
+		assert.Contains(t, queried, u)
+	}
+
+	for _, u := range users {
+		assert.NotContains(t, queried, u)
+	}
+}
+
+func TestBoltDB_Unique(t *testing.T) {
+	queried := unique([]string{"@blah", "@blah1", "@blah", "@blah1", "@blah3"})
+	m := make(map[string]int)
+	for _, s := range queried {
+		if _, ok := m[s]; !ok {
+			m[s] = 0
+		}
+		m[s]++
+	}
+	for _, cnt := range m {
+		assert.Equal(t, cnt, 1)
+	}
+}
+
 func prepareBoltDB(t *testing.T) *BoltDB {
 	loc, err := ioutil.TempDir("", "test_groups_multibot")
 	require.NoError(t, err, "failed to make temp dir")

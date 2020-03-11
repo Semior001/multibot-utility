@@ -51,6 +51,29 @@ func (_m *MockStore) DeleteUserFromGroup(chatID string, alias string, user strin
 	return r0
 }
 
+// FindAliases provides a mock function with given fields: chatID, aliases
+func (_m *MockStore) FindAliases(chatID string, aliases []string) ([]string, error) {
+	ret := _m.Called(chatID, aliases)
+
+	var r0 []string
+	if rf, ok := ret.Get(0).(func(string, []string) []string); ok {
+		r0 = rf(chatID, aliases)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]string)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string, []string) error); ok {
+		r1 = rf(chatID, aliases)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetGroup provides a mock function with given fields: chatID, alias
 func (_m *MockStore) GetGroup(chatID string, alias string) ([]string, error) {
 	ret := _m.Called(chatID, alias)

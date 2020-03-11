@@ -48,7 +48,7 @@ func (b *BoltDB) GetGroups(chatID string) (map[string][]string, error) {
 			)
 		}
 		err := chatBkt.ForEach(func(k, v []byte) error {
-			u := []string{}
+			var u []string
 			err := json.Unmarshal(v, &u)
 			if err != nil {
 				return errors.Wrapf(err, "failed to get groups of chat %s", chatID)
@@ -56,12 +56,9 @@ func (b *BoltDB) GetGroups(chatID string) (map[string][]string, error) {
 			res[string(k)] = u
 			return nil
 		})
-		return err
+		return errors.Wrapf(err, "failed to get groups of chat %s", chatID)
 	})
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to get groups of chat %s", chatID)
-	}
-	return res, nil
+	return res, err
 }
 
 // DeleteUserFromGroup removes user from the group
@@ -204,7 +201,7 @@ func (b *BoltDB) PutGroup(chatID string, alias string, users []string) error {
 
 // GetGroup returns all users of the single group
 func (b *BoltDB) GetGroup(chatID string, alias string) ([]string, error) {
-	users := []string{}
+	var users []string
 	err := b.db.View(func(tx *bolt.Tx) error {
 		chatBkt := tx.Bucket([]byte(groupBotBktName)).Bucket([]byte(chatID))
 		if chatBkt == nil {
@@ -223,8 +220,49 @@ func (b *BoltDB) GetGroup(chatID string, alias string) ([]string, error) {
 		}
 		return nil
 	})
-	if err != nil {
-		return nil, err
+	return users, err
+}
+
+// FindAliases looks for group aliases in the database
+// and returns members of groups if group alias is present
+func (b *BoltDB) FindAliases(chatID string, aliases []string) ([]string, error) {
+	var users []string
+	err := b.db.View(func(tx *bolt.Tx) error {
+		chatBkt := tx.Bucket([]byte(groupBotBktName)).Bucket([]byte(chatID))
+		if chatBkt == nil {
+			return errors.Wrapf(
+				errors.New("chat bucket does not exist"),
+				"error while looking for aliases of chat %s in boltdb", chatID,
+			)
+		}
+		// looking for aliases in chat bucket
+		for _, alias := range aliases {
+			group := chatBkt.Get([]byte(alias))
+			// this alias is not a group, skip
+			if group == nil {
+				continue
+			}
+			var members []string
+			err := json.Unmarshal(group, &members)
+			if err != nil {
+				return errors.Wrapf(err, "error while looking for aliases of chat %s in boltdb", chatID)
+			}
+			users = append(users, members...)
+		}
+		return nil
+	})
+	return unique(users), err
+}
+
+// unique returns slice of unique string occurrences from the source one
+func unique(sl []string) []string {
+	m := make(map[string]struct{})
+	for _, s := range sl {
+		m[s] = struct{}{}
 	}
-	return users, nil
+	var res []string
+	for s, _ := range m {
+		res = append(res, s)
+	}
+	return res
 }

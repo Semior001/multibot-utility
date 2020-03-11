@@ -10,4 +10,5 @@ type Store interface {
 	GetGroups(chatID string) (groups map[string][]string, err error)
 	DeleteUserFromGroup(chatID string, alias string, user string) (err error)
 	DeleteGroup(chatID string, alias string) (err error)
+	FindAliases(chatID string, aliases []string) (users []string, err error)
 }
