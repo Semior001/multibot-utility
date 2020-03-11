@@ -31,7 +31,7 @@ func TestGroupBot_AddGroup(t *testing.T) {
 		mock.Anything,
 	).Return(nil)
 
-	b := NewGroupBot(&mockGroupStore)
+	b := NewGroupBot(&mockGroupStore, false)
 
 	resp := b.OnMessage(Message{
 		From: User{
@@ -69,7 +69,7 @@ func TestGroupBot_ListGroups(t *testing.T) {
 		"@admins_9": {"@test", "@test1", "@test2", "@test3"},
 	}, nil)
 
-	b := NewGroupBot(&mockGroupStore)
+	b := NewGroupBot(&mockGroupStore, false)
 
 	for i := 0; i < 10; i++ {
 		b.OnMessage(Message{
@@ -106,7 +106,7 @@ func TestGroupBot_DeleteUserFromGroup(t *testing.T) {
 		mock.Anything,
 	).Return(nil)
 
-	b := NewGroupBot(&mockGroupStore)
+	b := NewGroupBot(&mockGroupStore, false)
 
 	b.OnMessage(Message{
 		From: User{
@@ -147,7 +147,7 @@ func TestGroupBot_DeleteGroup(t *testing.T) {
 		mock.Anything,
 	).Return(map[string][]string{}, nil)
 
-	b := NewGroupBot(&mockGroupStore)
+	b := NewGroupBot(&mockGroupStore, false)
 
 	b.OnMessage(Message{
 		From: User{
@@ -182,7 +182,7 @@ func TestGroupBot_AddUser(t *testing.T) {
 		"@some_students",
 		"@blah",
 	).Return(nil)
-	b := NewGroupBot(&mockGroupStore)
+	b := NewGroupBot(&mockGroupStore, false)
 
 	resp := b.OnMessage(Message{
 		From: User{
@@ -196,52 +196,7 @@ func TestGroupBot_AddUser(t *testing.T) {
 	assert.Equal(t, "User @blah has been successfully added to the group @some_students", resp.Text)
 }
 
-func TestGroupBot_FailedAuth(t *testing.T) {
-	mockGroupStore := groups.MockStore{}
-	b := NewGroupBot(&mockGroupStore)
-
-	resp := b.OnMessage(Message{
-		From: User{
-			Username:    "blah",
-			DisplayName: "blahblah",
-			IsAdmin:     false,
-		},
-		Text: "/add_group @some_students @blah @blah1 @blah2",
-	})
-	assert.Equal(t, (*Response)(nil), resp)
-
-	resp = b.OnMessage(Message{
-		From: User{
-			Username:    "blah",
-			DisplayName: "blahblah",
-			IsAdmin:     false,
-		},
-		Text: "/delete_group @some_students",
-	})
-	assert.Equal(t, (*Response)(nil), resp)
-
-	resp = b.OnMessage(Message{
-		From: User{
-			Username:    "blah",
-			DisplayName: "blahblah",
-			IsAdmin:     false,
-		},
-		Text: "/delete_user_from_group @some_students @blah",
-	})
-	assert.Equal(t, (*Response)(nil), resp)
-
-	resp = b.OnMessage(Message{
-		From: User{
-			Username:    "blah",
-			DisplayName: "blahblah",
-			IsAdmin:     false,
-		},
-		Text: "/add_user_to_group @some_students @blah",
-	})
-	assert.Equal(t, (*Response)(nil), resp)
-}
-
-func TestGroupBot_TestTrigger(t *testing.T) {
+func TestGroupBot_Trigger(t *testing.T) {
 	mockGroupStore := groups.MockStore{}
 	mockGroupStore.On(
 		"PutGroup",
@@ -253,8 +208,12 @@ func TestGroupBot_TestTrigger(t *testing.T) {
 		"FindAliases",
 		mock.Anything, []string{"@some_students", "@kek"},
 	).Return([]string{"@blah", "@blah1", "@blah2", "@blah3", "@blah4"}, nil)
+	mockGroupStore.On(
+		"FindAliases",
+		mock.Anything, []string{"@kek", "@some_students"},
+	).Return([]string{"@blah", "@blah1", "@blah2", "@blah3", "@blah4"}, nil)
 
-	b := NewGroupBot(&mockGroupStore)
+	b := NewGroupBot(&mockGroupStore, false)
 
 	b.OnMessage(Message{
 		From: User{
@@ -309,4 +268,220 @@ func TestGroupBot_Unique(t *testing.T) {
 	for _, cnt := range m {
 		assert.Equal(t, cnt, 1)
 	}
+}
+
+func TestGroupBot_TriggerNoAliases(t *testing.T) {
+	mockGroupStore := groups.MockStore{}
+	mockGroupStore.On(
+		"PutGroup",
+		mock.Anything,
+		mock.Anything,
+		mock.Anything,
+	).Return(nil)
+	mockGroupStore.On(
+		"FindAliases",
+		mock.Anything, mock.Anything,
+	).Return([]string{}, nil)
+
+	b := NewGroupBot(&mockGroupStore, false)
+
+	b.OnMessage(Message{
+		From: User{
+			Username:    "blah",
+			DisplayName: "blahblah",
+			IsAdmin:     true,
+		},
+		Text: "/add_group @some_students @blah @blah1 @blah2",
+	})
+
+	b.OnMessage(Message{
+		From: User{
+			Username:    "blah",
+			DisplayName: "blahblah",
+			IsAdmin:     true,
+		},
+		Text: "/add_group @kek @blah @blah3 @blah4",
+	})
+
+	b.OnMessage(Message{
+		From: User{
+			Username:    "blah",
+			DisplayName: "blahblah",
+			IsAdmin:     true,
+		},
+		Text: "/add_group @lol @blah5 @blah6 @blah7",
+	})
+
+	resp := b.OnMessage(Message{
+		Text: "There is a reference to nobody",
+	})
+	assert.Nil(t, resp)
+}
+
+func TestGroupBot_IllegalArgumentsNumber(t *testing.T) {
+	// add user
+	mockGroupStore := groups.MockStore{}
+	mockGroupStore.On(
+		"AddUser",
+		"",
+		"@some_students",
+		"@blah",
+	).Return(nil)
+	b := NewGroupBot(&mockGroupStore, true)
+
+	resp := b.OnMessage(Message{
+		From: User{
+			Username:    "blah",
+			DisplayName: "blahblah",
+			IsAdmin:     true,
+		},
+		Text: "/add_user_to_group @some_students",
+	})
+
+	assert.Equal(t, "Command requires exactly two arguments - group alias and username", resp.Text)
+
+	// delete user from group
+	resp = b.OnMessage(Message{
+		From: User{
+			Username:    "blah",
+			DisplayName: "blahblah",
+			IsAdmin:     true,
+		},
+		Text: "/delete_user_from_group @some_students",
+	})
+
+	assert.Equal(t, "Command requires exactly two arguments - group alias and username", resp.Text)
+
+	// delete group
+	resp = b.OnMessage(Message{
+		From: User{
+			Username:    "blah",
+			DisplayName: "blahblah",
+			IsAdmin:     true,
+		},
+		Text: "/delete_group",
+	})
+
+	assert.Equal(t, "Command requires exactly one argument - group alias", resp.Text)
+
+	// add group
+	resp = b.OnMessage(Message{
+		From: User{
+			Username:    "blah",
+			DisplayName: "blahblah",
+			IsAdmin:     true,
+		},
+		Text: "/add_group @blah",
+	})
+
+	assert.Equal(t, "Not enough parameters to add group", resp.Text)
+
+	// without responding
+	b = NewGroupBot(&mockGroupStore, false)
+
+	resp = b.OnMessage(Message{
+		From: User{
+			Username:    "blah",
+			DisplayName: "blahblah",
+			IsAdmin:     true,
+		},
+		Text: "/add_user_to_group @some_students",
+	})
+
+	assert.Nil(t, resp)
+
+	// delete user from group
+	resp = b.OnMessage(Message{
+		From: User{
+			Username:    "blah",
+			DisplayName: "blahblah",
+			IsAdmin:     true,
+		},
+		Text: "/delete_user_from_group @some_students",
+	})
+
+	assert.Nil(t, resp)
+
+	// delete group
+	resp = b.OnMessage(Message{
+		From: User{
+			Username:    "blah",
+			DisplayName: "blahblah",
+			IsAdmin:     true,
+		},
+		Text: "/delete_group",
+	})
+
+	assert.Nil(t, resp)
+
+	// add group
+	resp = b.OnMessage(Message{
+		From: User{
+			Username:    "blah",
+			DisplayName: "blahblah",
+			IsAdmin:     true,
+		},
+		Text: "/add_group @blah",
+	})
+
+	assert.Nil(t, resp)
+
+}
+
+func TestGroupBot_IllegalAccess(t *testing.T) {
+	mockGroupStore := groups.MockStore{}
+	b := NewGroupBot(&mockGroupStore, false)
+
+	resp := b.OnMessage(Message{
+		From: User{
+			Username:    "blah",
+			DisplayName: "blahblah",
+			IsAdmin:     false,
+		},
+		Text: "/add_group @some_students @blah @blah1 @blah2",
+	})
+	assert.Equal(t, (*Response)(nil), resp)
+
+	resp = b.OnMessage(Message{
+		From: User{
+			Username:    "blah",
+			DisplayName: "blahblah",
+			IsAdmin:     false,
+		},
+		Text: "/delete_group @some_students",
+	})
+	assert.Equal(t, (*Response)(nil), resp)
+
+	resp = b.OnMessage(Message{
+		From: User{
+			Username:    "blah",
+			DisplayName: "blahblah",
+			IsAdmin:     false,
+		},
+		Text: "/delete_user_from_group @some_students @blah",
+	})
+	assert.Equal(t, (*Response)(nil), resp)
+
+	resp = b.OnMessage(Message{
+		From: User{
+			Username:    "blah",
+			DisplayName: "blahblah",
+			IsAdmin:     false,
+		},
+		Text: "/add_user_to_group @some_students @blah",
+	})
+	assert.Equal(t, (*Response)(nil), resp)
+
+	// with responding
+	b = NewGroupBot(&mockGroupStore, true)
+	resp = b.OnMessage(Message{
+		From: User{
+			Username:    "blah",
+			DisplayName: "blahblah",
+			IsAdmin:     false,
+		},
+		Text: "/add_user_to_group @some_students @blah",
+	})
+	assert.Equal(t, "You don't have admin rights to execute this command", resp.Text)
+
 }

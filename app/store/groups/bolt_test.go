@@ -81,6 +81,26 @@ func TestBoltDB_DeleteUserFromGroup(t *testing.T) {
 		assert.NotContains(t, users, "@blah1")
 		return nil
 	})
+
+	err = svc.DeleteUserFromGroup("foo", "@bar", "@blah1")
+	err = svc.db.View(func(tx *bolt.Tx) error {
+		bkt := tx.Bucket([]byte(groupBotBktName))
+		assert.NotNil(t, bkt)
+
+		chat := bkt.Bucket([]byte("foo"))
+		assert.NotNil(t, chat)
+
+		j := chat.Get([]byte("@bar"))
+		require.NoError(t, err)
+
+		err = json.Unmarshal(j, &users)
+		require.NoError(t, err)
+
+		assert.Contains(t, users, "@blah")
+		assert.Contains(t, users, "@blah2")
+		assert.NotContains(t, users, "@blah1")
+		return nil
+	})
 }
 
 func TestBoltDB_GetGroup(t *testing.T) {

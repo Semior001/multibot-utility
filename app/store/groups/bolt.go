@@ -93,7 +93,7 @@ func (b *BoltDB) DeleteUserFromGroup(chatID string, alias string, user string) e
 			}
 		}
 		if idx == -1 {
-			// if user does not exist in the list - we anyone to delete
+			// if user does not exist in the list - we just do nothing
 			return nil
 		}
 

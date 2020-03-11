@@ -18,9 +18,10 @@ type GroupBot struct {
 }
 
 // NewGroupBot initializes an instance of GroupBot
-func NewGroupBot(store groups.Store) *GroupBot {
+func NewGroupBot(store groups.Store, respondAllCmds bool) *GroupBot {
 	return &GroupBot{
-		Store: store,
+		Store:              store,
+		RespondAllCommands: respondAllCmds,
 	}
 }
 
@@ -35,34 +36,34 @@ func (g *GroupBot) OnMessage(msg Message) *Response {
 	switch cmd {
 	case "/add_group":
 		if !msg.From.IsAdmin {
-			return g.prepareIllegalAccessMessage(msg)
+			return g.prepareIllegalAccessMessage()
 		}
 		return g.addGroup(msg, args)
 	case "/delete_user_from_group":
 		if !msg.From.IsAdmin {
-			return g.prepareIllegalAccessMessage(msg)
+			return g.prepareIllegalAccessMessage()
 		}
 		return g.deleteUserFromGroup(msg, args)
 	case "/delete_group":
 		if !msg.From.IsAdmin {
-			return g.prepareIllegalAccessMessage(msg)
+			return g.prepareIllegalAccessMessage()
 		}
 		return g.deleteGroup(msg, args)
 	case "/list_groups":
 		return g.listGroups(msg, args)
 	case "/add_user_to_group":
 		if !msg.From.IsAdmin {
-			return g.prepareIllegalAccessMessage(msg)
+			return g.prepareIllegalAccessMessage()
 		}
 		return g.addUserToGroup(msg, args)
 	}
 	return g.handleTrigger(msg)
 }
 
-// handleTrigger checks the text for existance of group alias and,
+// handleTrigger checks the text for existence of group alias and,
 // if present, sends members of it to chat
 func (g *GroupBot) handleTrigger(msg Message) *Response {
-	// taking all occurences of aliases, e.g. @admins or @semior001
+	// taking all occurrences of aliases, e.g. @admins or @semior001
 	seeker, err := regexp.Compile(regexpAlias)
 	if err != nil {
 		log.Printf("[WARN] error while looking for alias trigger: %+v", err)
@@ -100,8 +101,8 @@ func (g *GroupBot) addUserToGroup(msg Message, args []string) *Response {
 	if len(args) != 2 {
 		if g.RespondAllCommands {
 			return &Response{
-				ReplyTo: &msg,
-				Text:    "Command requires exactly two arguments - group alias and username",
+				Reply: true,
+				Text:  "Command requires exactly two arguments - group alias and username",
 			}
 		}
 		return nil
@@ -115,16 +116,16 @@ func (g *GroupBot) addUserToGroup(msg Message, args []string) *Response {
 		log.Printf("[WARN] error while adding user to the group %s:%s: %+v", msg.ChatID, groupAlias, err)
 		if g.RespondAllCommands {
 			return &Response{
-				ReplyTo: &msg,
-				Text:    "Internal error",
+				Reply: true,
+				Text:  "Internal error",
 			}
 		}
 		return nil
 	}
 
 	return &Response{
-		ReplyTo: &msg,
-		Text:    fmt.Sprintf("User %s has been successfully added to the group %s", user, groupAlias),
+		Reply: true,
+		Text:  fmt.Sprintf("User %s has been successfully added to the group %s", user, groupAlias),
 	}
 }
 
@@ -138,8 +139,8 @@ func (g *GroupBot) listGroups(msg Message, _ []string) *Response {
 		log.Printf("[WARN] error while listing groups of chat %s: %+v", msg.ChatID, err)
 		if g.RespondAllCommands {
 			return &Response{
-				ReplyTo: &msg,
-				Text:    "Internal error",
+				Reply: true,
+				Text:  "Internal error",
 			}
 		}
 		return nil
@@ -147,7 +148,7 @@ func (g *GroupBot) listGroups(msg Message, _ []string) *Response {
 
 	// if no groups are registered in the store - send corresponding response
 	if len(groupList) == 0 {
-		return &Response{ReplyTo: &msg, Text: "There's no groups in this chat yet"}
+		return &Response{Reply: true, Text: "There's no groups in this chat yet"}
 	}
 
 	var groupStrings []string
@@ -158,7 +159,7 @@ func (g *GroupBot) listGroups(msg Message, _ []string) *Response {
 		groupStrings = append(groupStrings, fmt.Sprintf("%s : %s", alias, strings.Join(users, ", ")))
 	}
 
-	return &Response{ReplyTo: &msg, Text: strings.Join(groupStrings, "\n")}
+	return &Response{Reply: true, Text: strings.Join(groupStrings, "\n")}
 }
 
 // deleteGroup handles /delete_group command and returns corresponding response
@@ -169,7 +170,7 @@ func (g *GroupBot) deleteGroup(msg Message, args []string) *Response {
 	// command requires exactly one argument - group alias
 	if len(args) != 1 {
 		if g.RespondAllCommands {
-			return &Response{ReplyTo: &msg, Text: "Command requires exactly one argument - group alias"}
+			return &Response{Reply: true, Text: "Command requires exactly one argument - group alias"}
 		}
 		return nil
 	}
@@ -180,13 +181,13 @@ func (g *GroupBot) deleteGroup(msg Message, args []string) *Response {
 		log.Printf("[WARN] error while deleting group %s:%s: %+v", msg.ChatID, groupAlias, err)
 		if g.RespondAllCommands {
 			return &Response{
-				ReplyTo: &msg,
-				Text:    "Internal error",
+				Reply: true,
+				Text:  "Internal error",
 			}
 		}
 		return nil
 	}
-	return &Response{ReplyTo: &msg, Text: "Group @admins has been successfully deleted"}
+	return &Response{Reply: true, Text: "Group @admins has been successfully deleted"}
 }
 
 // deleteUserFromGroup handles /delete_user_from_group command and returns corresponding response
@@ -197,7 +198,7 @@ func (g *GroupBot) deleteUserFromGroup(msg Message, args []string) *Response {
 	// command requires exactly one group alias and exactly one username
 	if len(args) != 2 {
 		if g.RespondAllCommands {
-			return &Response{ReplyTo: &msg, Text: "Command requires exactly two arguments - group alias and username"}
+			return &Response{Reply: true, Text: "Command requires exactly two arguments - group alias and username"}
 		}
 		return nil
 	}
@@ -210,14 +211,14 @@ func (g *GroupBot) deleteUserFromGroup(msg Message, args []string) *Response {
 		log.Printf("[WARN] error while deleting user from group %s:%s: %+v", msg.ChatID, groupAlias, err)
 		if g.RespondAllCommands {
 			return &Response{
-				ReplyTo: &msg,
-				Text:    "Internal error",
+				Reply: true,
+				Text:  "Internal error",
 			}
 		}
 		return nil
 	}
 
-	return &Response{ReplyTo: &msg, Text: fmt.Sprintf("User %s has been successfully deleted from group %s", user, groupAlias)}
+	return &Response{Reply: true, Text: fmt.Sprintf("User %s has been successfully deleted from group %s", user, groupAlias)}
 }
 
 // addGroup handles /add_group command and returns corresponding response
@@ -228,7 +229,7 @@ func (g *GroupBot) addGroup(msg Message, args []string) *Response {
 	// command requires group alias and at least one username
 	if len(args) < 2 {
 		if g.RespondAllCommands {
-			return &Response{ReplyTo: &msg, Text: "Not enough parameters to add group"}
+			return &Response{Reply: true, Text: "Not enough parameters to add group"}
 		}
 		return nil
 	}
@@ -241,14 +242,14 @@ func (g *GroupBot) addGroup(msg Message, args []string) *Response {
 		log.Printf("[WARN] error while adding group alias %s:%s: %+v", msg.ChatID, groupAlias, err)
 		if g.RespondAllCommands {
 			return &Response{
-				ReplyTo: &msg,
-				Text:    "Internal error",
+				Reply: true,
+				Text:  "Internal error",
 			}
 		}
 		return nil
 	}
 
-	return &Response{ReplyTo: &msg, Text: fmt.Sprintf("Group %s has been successfully added", groupAlias)}
+	return &Response{Reply: true, Text: fmt.Sprintf("Group %s has been successfully added", groupAlias)}
 }
 
 // Help returns the usage of this bot
@@ -264,9 +265,9 @@ func (g *GroupBot) Help() string {
 // prepareIllegalAccessMessage creates a response to the illegal
 // command execution - if in bot parameters defined to respond all
 // commands - it will return a message, otherwise - nothing
-func (g *GroupBot) prepareIllegalAccessMessage(msg Message) *Response {
+func (g *GroupBot) prepareIllegalAccessMessage() *Response {
 	if g.RespondAllCommands {
-		return &Response{ReplyTo: &msg, Text: "You don't have admin rights to execute this command"}
+		return &Response{Reply: true, Text: "You don't have admin rights to execute this command"}
 	}
 	return nil
 }
