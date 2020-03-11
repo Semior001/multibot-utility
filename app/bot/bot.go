@@ -60,10 +60,11 @@ func (m *MultiBot) OnMessage(msg Message) *Response {
 
 	texts := make(chan string)
 	var pin int32
-	var preview int32
 	var unpin int32
+	var preview int32
 	var reply int32
 	var banInterval time.Duration = 0
+
 	var mutex = &sync.Mutex{}
 
 	for _, bot := range *m {
@@ -112,6 +113,8 @@ func (m *MultiBot) OnMessage(msg Message) *Response {
 		Text:        strings.Join(lines, "\n"),
 		Pin:         atomic.LoadInt32(&pin) > 0,
 		Unpin:       atomic.LoadInt32(&unpin) > 0,
+		Preview:     atomic.LoadInt32(&preview) > 0,
+		Reply:       atomic.LoadInt32(&reply) > 0,
 		BanInterval: banInterval,
 	}
 }
