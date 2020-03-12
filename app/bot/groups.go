@@ -19,6 +19,7 @@ type GroupBot struct {
 
 // NewGroupBot initializes an instance of GroupBot
 func NewGroupBot(store groups.Store, respondAllCmds bool) *GroupBot {
+	log.Print("[INFO] GroupBot instantiated")
 	return &GroupBot{
 		Store:              store,
 		RespondAllCommands: respondAllCmds,

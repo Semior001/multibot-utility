@@ -2,6 +2,7 @@ package groups
 
 import (
 	"encoding/json"
+	"log"
 
 	bolt "github.com/coreos/bbolt"
 	"github.com/pkg/errors"
@@ -17,6 +18,7 @@ type BoltDB struct {
 
 // NewBoltDB creates new groupbot store
 func NewBoltDB(fileName string, opts bolt.Options) (*BoltDB, error) {
+	log.Print("[INFO] groups.BoltDB instantiated")
 	db, err := bolt.Open(fileName, 0600, &opts)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to open boltdb at %s", fileName)

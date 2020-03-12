@@ -68,6 +68,10 @@ func (m *MultiBot) OnMessage(msg Message) *Response {
 	var mutex = &sync.Mutex{}
 
 	for _, bot := range *m {
+		// if we pass the variable into the goroutine, all goroutines
+		// will take the same variable, bot is a SINGLE variable
+		bot := bot
+		// declaring goroutine
 		wg.Go(func(ctx context.Context) {
 			if resp := bot.OnMessage(msg); resp != nil {
 				texts <- resp.Text
