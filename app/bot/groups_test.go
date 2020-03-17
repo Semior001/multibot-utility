@@ -14,12 +14,12 @@ import (
 )
 
 func TestGroupBot_Help(t *testing.T) {
-	require.Equal(t, `/add_group @group_alias @user1, @user2, ... - add user
-/delete_user_from_group @group_alias @user - removes user from the group
-/detete_group @group_alias - removes group
-/list_groups - shows the list of existing groups
-/add_user_to_group @group_alias @user - adds user to the specified group
-@group_alias - triggers bot to send message with all participants of the group`, (&GroupBot{}).Help())
+	require.Equal(t, `/add\_group @group\_alias @user1, @user2, ... - add user
+/delete\_user\_from\_group @group\_alias @user - removes user from the group
+/detete\_group @group\_alias - removes group
+/list\_groups - shows the list of existing groups
+/add\_user\_to\_group @group\_alias @user - adds user to the specified group
+@group\_alias - triggers bot to send message with all participants of the group`, (&GroupBot{}).Help())
 }
 
 func TestGroupBot_AddGroup(t *testing.T) {

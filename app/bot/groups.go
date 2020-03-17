@@ -275,12 +275,12 @@ func (g *GroupBot) addGroup(msg Message, args []string) *Response {
 
 // Help returns the usage of this bot
 func (g *GroupBot) Help() string {
-	return `/add_group @group_alias @user1, @user2, ... - add user
-/delete_user_from_group @group_alias @user - removes user from the group
-/detete_group @group_alias - removes group
-/list_groups - shows the list of existing groups
-/add_user_to_group @group_alias @user - adds user to the specified group
-@group_alias - triggers bot to send message with all participants of the group`
+	return `/add\_group @group\_alias @user1, @user2, ... - add user
+/delete\_user\_from\_group @group\_alias @user - removes user from the group
+/detete\_group @group\_alias - removes group
+/list\_groups - shows the list of existing groups
+/add\_user\_to\_group @group\_alias @user - adds user to the specified group
+@group\_alias - triggers bot to send message with all participants of the group`
 }
 
 // prepareIllegalAccessMessage creates a response to the illegal
