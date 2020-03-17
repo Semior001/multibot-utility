@@ -256,6 +256,18 @@ func (b *BoltDB) FindAliases(chatID string, aliases []string) ([]string, error) 
 	return unique(users), err
 }
 
+// AddChat creates a chat bucket in the storage
+func (b *BoltDB) AddChat(id string) error {
+	err := b.db.Update(func(tx *bolt.Tx) error {
+		_, err := tx.Bucket([]byte(groupBotBktName)).CreateBucketIfNotExists([]byte(id))
+		if err != nil {
+			return errors.Wrapf(err, "failed to create chat bucket with chatId %s", id)
+		}
+		return nil
+	})
+	return err
+}
+
 // unique returns slice of unique string occurrences from the source one
 func unique(sl []string) []string {
 	m := make(map[string]struct{})

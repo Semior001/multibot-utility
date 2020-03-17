@@ -2,9 +2,7 @@ package cmd
 
 import (
 	"context"
-	"io/ioutil"
 	"log"
-	"path"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 
@@ -20,15 +18,14 @@ type TelegramCmd struct {
 		Token    string `long:"token" env:"TOKEN" description:"telegram bot token" default:"test"`
 		UserName string `long:"username" env:"USERNAME" description:"telegram bot username" default:"test"`
 	} `group:"telegram" namespace:"telegram" env-namespace:"TELEGRAM"`
+	Db struct {
+		Location string `long:"location" env:"LOCATION" description:"location of boltdb sotrage" required:"true"`
+	} `group:"db" namespace:"db" env-namespace:"DB"`
 }
 
 // Execute runs the telegram bot
 func (s TelegramCmd) Execute(_ []string) error {
-	loc, err := ioutil.TempDir("", "test_groups_multibot")
-	if err != nil {
-		log.Fatalf("failed to create temp dir at test_groups_multibot %+v", err)
-	}
-	svc, err := groups.NewBoltDB(path.Join(loc, "groups_bot_test.db"), bolt.Options{})
+	svc, err := groups.NewBoltDB(s.Db.Location, bolt.Options{})
 	if err != nil {
 		log.Fatalf("failed to create boltdb at test_groups_multibot %+v", err)
 	}

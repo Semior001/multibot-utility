@@ -25,7 +25,7 @@ type User struct {
 type Message struct {
 	ID             string
 	ChatID         string
-	From           User
+	From           *User
 	Sent           time.Time
 	Text           string `json:",omitempty"`
 	AddedBotToChat bool

@@ -34,7 +34,7 @@ func TestGroupBot_AddGroup(t *testing.T) {
 	b := NewGroupBot(&mockGroupStore, false)
 
 	resp := b.OnMessage(Message{
-		From: User{
+		From: &User{
 			Username:    "blah",
 			DisplayName: "blahblah",
 			IsAdmin:     true,
@@ -73,7 +73,7 @@ func TestGroupBot_ListGroups(t *testing.T) {
 
 	for i := 0; i < 10; i++ {
 		b.OnMessage(Message{
-			From: User{
+			From: &User{
 				Username:    "blah",
 				DisplayName: "blahblah",
 				IsAdmin:     true,
@@ -109,7 +109,7 @@ func TestGroupBot_DeleteUserFromGroup(t *testing.T) {
 	b := NewGroupBot(&mockGroupStore, false)
 
 	b.OnMessage(Message{
-		From: User{
+		From: &User{
 			Username:    "blah",
 			DisplayName: "blahblah",
 			IsAdmin:     true,
@@ -118,7 +118,7 @@ func TestGroupBot_DeleteUserFromGroup(t *testing.T) {
 	})
 
 	resp := b.OnMessage(Message{
-		From: User{
+		From: &User{
 			Username:    "blah",
 			DisplayName: "blahblah",
 			IsAdmin:     true,
@@ -150,7 +150,7 @@ func TestGroupBot_DeleteGroup(t *testing.T) {
 	b := NewGroupBot(&mockGroupStore, false)
 
 	b.OnMessage(Message{
-		From: User{
+		From: &User{
 			Username:    "blah",
 			DisplayName: "blahblah",
 			IsAdmin:     true,
@@ -159,7 +159,7 @@ func TestGroupBot_DeleteGroup(t *testing.T) {
 	})
 
 	resp := b.OnMessage(Message{
-		From: User{
+		From: &User{
 			Username:    "blah",
 			DisplayName: "blahblah",
 			IsAdmin:     true,
@@ -185,7 +185,7 @@ func TestGroupBot_AddUser(t *testing.T) {
 	b := NewGroupBot(&mockGroupStore, false)
 
 	resp := b.OnMessage(Message{
-		From: User{
+		From: &User{
 			Username:    "blah",
 			DisplayName: "blahblah",
 			IsAdmin:     true,
@@ -216,7 +216,7 @@ func TestGroupBot_Trigger(t *testing.T) {
 	b := NewGroupBot(&mockGroupStore, false)
 
 	b.OnMessage(Message{
-		From: User{
+		From: &User{
 			Username:    "blah",
 			DisplayName: "blahblah",
 			IsAdmin:     true,
@@ -225,7 +225,7 @@ func TestGroupBot_Trigger(t *testing.T) {
 	})
 
 	b.OnMessage(Message{
-		From: User{
+		From: &User{
 			Username:    "blah",
 			DisplayName: "blahblah",
 			IsAdmin:     true,
@@ -234,7 +234,7 @@ func TestGroupBot_Trigger(t *testing.T) {
 	})
 
 	b.OnMessage(Message{
-		From: User{
+		From: &User{
 			Username:    "blah",
 			DisplayName: "blahblah",
 			IsAdmin:     true,
@@ -286,7 +286,7 @@ func TestGroupBot_TriggerNoAliases(t *testing.T) {
 	b := NewGroupBot(&mockGroupStore, false)
 
 	b.OnMessage(Message{
-		From: User{
+		From: &User{
 			Username:    "blah",
 			DisplayName: "blahblah",
 			IsAdmin:     true,
@@ -295,7 +295,7 @@ func TestGroupBot_TriggerNoAliases(t *testing.T) {
 	})
 
 	b.OnMessage(Message{
-		From: User{
+		From: &User{
 			Username:    "blah",
 			DisplayName: "blahblah",
 			IsAdmin:     true,
@@ -304,7 +304,7 @@ func TestGroupBot_TriggerNoAliases(t *testing.T) {
 	})
 
 	b.OnMessage(Message{
-		From: User{
+		From: &User{
 			Username:    "blah",
 			DisplayName: "blahblah",
 			IsAdmin:     true,
@@ -330,7 +330,7 @@ func TestGroupBot_IllegalArgumentsNumber(t *testing.T) {
 	b := NewGroupBot(&mockGroupStore, true)
 
 	resp := b.OnMessage(Message{
-		From: User{
+		From: &User{
 			Username:    "blah",
 			DisplayName: "blahblah",
 			IsAdmin:     true,
@@ -342,7 +342,7 @@ func TestGroupBot_IllegalArgumentsNumber(t *testing.T) {
 
 	// delete user from group
 	resp = b.OnMessage(Message{
-		From: User{
+		From: &User{
 			Username:    "blah",
 			DisplayName: "blahblah",
 			IsAdmin:     true,
@@ -354,7 +354,7 @@ func TestGroupBot_IllegalArgumentsNumber(t *testing.T) {
 
 	// delete group
 	resp = b.OnMessage(Message{
-		From: User{
+		From: &User{
 			Username:    "blah",
 			DisplayName: "blahblah",
 			IsAdmin:     true,
@@ -366,7 +366,7 @@ func TestGroupBot_IllegalArgumentsNumber(t *testing.T) {
 
 	// add group
 	resp = b.OnMessage(Message{
-		From: User{
+		From: &User{
 			Username:    "blah",
 			DisplayName: "blahblah",
 			IsAdmin:     true,
@@ -380,7 +380,7 @@ func TestGroupBot_IllegalArgumentsNumber(t *testing.T) {
 	b = NewGroupBot(&mockGroupStore, false)
 
 	resp = b.OnMessage(Message{
-		From: User{
+		From: &User{
 			Username:    "blah",
 			DisplayName: "blahblah",
 			IsAdmin:     true,
@@ -392,7 +392,7 @@ func TestGroupBot_IllegalArgumentsNumber(t *testing.T) {
 
 	// delete user from group
 	resp = b.OnMessage(Message{
-		From: User{
+		From: &User{
 			Username:    "blah",
 			DisplayName: "blahblah",
 			IsAdmin:     true,
@@ -404,7 +404,7 @@ func TestGroupBot_IllegalArgumentsNumber(t *testing.T) {
 
 	// delete group
 	resp = b.OnMessage(Message{
-		From: User{
+		From: &User{
 			Username:    "blah",
 			DisplayName: "blahblah",
 			IsAdmin:     true,
@@ -416,7 +416,7 @@ func TestGroupBot_IllegalArgumentsNumber(t *testing.T) {
 
 	// add group
 	resp = b.OnMessage(Message{
-		From: User{
+		From: &User{
 			Username:    "blah",
 			DisplayName: "blahblah",
 			IsAdmin:     true,
@@ -433,7 +433,7 @@ func TestGroupBot_IllegalAccess(t *testing.T) {
 	b := NewGroupBot(&mockGroupStore, false)
 
 	resp := b.OnMessage(Message{
-		From: User{
+		From: &User{
 			Username:    "blah",
 			DisplayName: "blahblah",
 			IsAdmin:     false,
@@ -443,7 +443,7 @@ func TestGroupBot_IllegalAccess(t *testing.T) {
 	assert.Equal(t, (*Response)(nil), resp)
 
 	resp = b.OnMessage(Message{
-		From: User{
+		From: &User{
 			Username:    "blah",
 			DisplayName: "blahblah",
 			IsAdmin:     false,
@@ -453,7 +453,7 @@ func TestGroupBot_IllegalAccess(t *testing.T) {
 	assert.Equal(t, (*Response)(nil), resp)
 
 	resp = b.OnMessage(Message{
-		From: User{
+		From: &User{
 			Username:    "blah",
 			DisplayName: "blahblah",
 			IsAdmin:     false,
@@ -463,7 +463,7 @@ func TestGroupBot_IllegalAccess(t *testing.T) {
 	assert.Equal(t, (*Response)(nil), resp)
 
 	resp = b.OnMessage(Message{
-		From: User{
+		From: &User{
 			Username:    "blah",
 			DisplayName: "blahblah",
 			IsAdmin:     false,
@@ -475,7 +475,7 @@ func TestGroupBot_IllegalAccess(t *testing.T) {
 	// with responding
 	b = NewGroupBot(&mockGroupStore, true)
 	resp = b.OnMessage(Message{
-		From: User{
+		From: &User{
 			Username:    "blah",
 			DisplayName: "blahblah",
 			IsAdmin:     false,

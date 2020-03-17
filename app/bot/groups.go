@@ -10,6 +10,7 @@ import (
 )
 
 const regexpAlias = "@[a-zA-Z0-9_]+"
+const aliasPrefix = "@"
 
 // GroupBot gathers usernames into one mention, like @admins
 type GroupBot struct {
@@ -121,6 +122,10 @@ func (g *GroupBot) addUserToGroup(msg Message, args []string) *Response {
 	groupAlias := args[0]
 	user := args[1]
 
+	if !strings.HasPrefix(user, aliasPrefix) {
+		user = aliasPrefix + user
+	}
+
 	err := g.Store.AddUser(msg.ChatID, groupAlias, user)
 	if err != nil {
 		log.Printf("[WARN] error while adding user to the group %s:%s: %+v", msg.ChatID, groupAlias, err)
@@ -197,7 +202,7 @@ func (g *GroupBot) deleteGroup(msg Message, args []string) *Response {
 		}
 		return nil
 	}
-	return &Response{Reply: true, Text: "Group @admins has been successfully deleted"}
+	return &Response{Reply: true, Text: fmt.Sprintf("Group %s has been successfully deleted", groupAlias)}
 }
 
 // deleteUserFromGroup handles /delete_user_from_group command and returns corresponding response
@@ -246,6 +251,12 @@ func (g *GroupBot) addGroup(msg Message, args []string) *Response {
 
 	groupAlias := args[0]
 	users := args[1:]
+
+	for i := range users {
+		if !strings.HasPrefix(users[i], aliasPrefix) {
+			users[i] = aliasPrefix + users[i]
+		}
+	}
 
 	err := g.Store.PutGroup(msg.ChatID, groupAlias, users)
 	if err != nil {
