@@ -3,6 +3,7 @@ package groups
 import (
 	"encoding/json"
 	"io/ioutil"
+	"os"
 	"path"
 	"testing"
 
@@ -321,11 +322,33 @@ func TestBoltDB_Unique(t *testing.T) {
 	}
 }
 
+func TestBoltDB_AddChat(t *testing.T) {
+	svc := prepareBoltDB(t)
+
+	err := svc.AddChat("qwerty")
+	require.NoError(t, err)
+
+	err = svc.db.View(func(tx *bolt.Tx) error {
+		bkt := tx.Bucket([]byte(groupBotBktName))
+		assert.NotNil(t, bkt)
+
+		chat := bkt.Bucket([]byte("qwerty"))
+		assert.NotNil(t, chat)
+
+		return nil
+	})
+	require.NoError(t, err)
+}
+
 func prepareBoltDB(t *testing.T) *BoltDB {
 	loc, err := ioutil.TempDir("", "test_groups_multibot")
 	require.NoError(t, err, "failed to make temp dir")
 
 	svc, err := NewBoltDB(path.Join(loc, "groups_bot_test.db"), bolt.Options{})
 	require.NoError(t, err, "New bolt storage")
+
+	t.Cleanup(func() {
+		assert.NoError(t, os.RemoveAll(loc))
+	})
 	return svc
 }

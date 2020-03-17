@@ -11,6 +11,8 @@ import (
 	"github.com/go-pkgz/syncs"
 )
 
+//go:generate mockery -inpkg -name Bot -case snake
+
 // User defines user info of the Message
 type User struct {
 	ID          string
@@ -21,11 +23,12 @@ type User struct {
 
 // Message to pass data from/to bot
 type Message struct {
-	ID     string
-	ChatID string
-	From   User
-	Sent   time.Time
-	Text   string `json:",omitempty"`
+	ID             string
+	ChatID         string
+	From           User
+	Sent           time.Time
+	Text           string `json:",omitempty"`
+	AddedBotToChat bool
 }
 
 // Response describes bot's answer on particular message

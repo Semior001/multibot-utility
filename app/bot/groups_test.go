@@ -14,12 +14,12 @@ import (
 )
 
 func TestGroupBot_Help(t *testing.T) {
-	require.Equal(t, `/add_group @<group alias> @<user1>, @<user2>, ... - add user
-/delete_user_from_group @<group alias> @<user> - removes user from the group
-/detete_group @<group alias> - removes group
+	require.Equal(t, `/add_group @group_alias @user1, @user2, ... - add user
+/delete_user_from_group @group_alias @user - removes user from the group
+/detete_group @group_alias - removes group
 /list_groups - shows the list of existing groups
-/add_user_to_group @<group alias> @<user> - adds user to the specified group
-@<group alias> - triggers bot to send message with all participants of the group`, (&GroupBot{}).Help())
+/add_user_to_group @group_alias @user - adds user to the specified group
+@group_alias - triggers bot to send message with all participants of the group`, (&GroupBot{}).Help())
 }
 
 func TestGroupBot_AddGroup(t *testing.T) {
@@ -484,4 +484,16 @@ func TestGroupBot_IllegalAccess(t *testing.T) {
 	})
 	assert.Equal(t, "You don't have admin rights to execute this command", resp.Text)
 
+}
+
+func TestGroupBot_AddChat(t *testing.T) {
+	mockGroupStore := groups.MockStore{}
+	mockGroupStore.On("AddChat", mock.Anything).Return(nil)
+
+	b := NewGroupBot(&mockGroupStore, false)
+	resp := b.OnMessage(Message{
+		ChatID:         "qwerty",
+		AddedBotToChat: true,
+	})
+	assert.Nil(t, resp)
 }

@@ -9,6 +9,20 @@ type MockStore struct {
 	mock.Mock
 }
 
+// AddChat provides a mock function with given fields: id
+func (_m *MockStore) AddChat(id string) error {
+	ret := _m.Called(id)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string) error); ok {
+		r0 = rf(id)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // AddUser provides a mock function with given fields: chatID, alias, user
 func (_m *MockStore) AddUser(chatID string, alias string, user string) error {
 	ret := _m.Called(chatID, alias, user)

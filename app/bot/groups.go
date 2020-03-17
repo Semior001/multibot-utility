@@ -28,6 +28,15 @@ func NewGroupBot(store groups.Store, respondAllCmds bool) *GroupBot {
 
 // OnMessage receives any commands, that are listed in help and group aliases
 func (g *GroupBot) OnMessage(msg Message) *Response {
+	// first, is it a current bot addition
+	if msg.AddedBotToChat {
+		err := g.Store.AddChat(msg.ChatID)
+		if err != nil {
+			log.Printf("[WARN] error while adding chat to store: %+v", err)
+		}
+		return nil
+	}
+
 	tokens := strings.Split(msg.Text, " ")
 
 	// command may be in format /cmd@bot
@@ -255,12 +264,12 @@ func (g *GroupBot) addGroup(msg Message, args []string) *Response {
 
 // Help returns the usage of this bot
 func (g *GroupBot) Help() string {
-	return `/add_group @<group alias> @<user1>, @<user2>, ... - add user
-/delete_user_from_group @<group alias> @<user> - removes user from the group
-/detete_group @<group alias> - removes group
+	return `/add_group @group_alias @user1, @user2, ... - add user
+/delete_user_from_group @group_alias @user - removes user from the group
+/detete_group @group_alias - removes group
 /list_groups - shows the list of existing groups
-/add_user_to_group @<group alias> @<user> - adds user to the specified group
-@<group alias> - triggers bot to send message with all participants of the group`
+/add_user_to_group @group_alias @user - adds user to the specified group
+@group_alias - triggers bot to send message with all participants of the group`
 }
 
 // prepareIllegalAccessMessage creates a response to the illegal
