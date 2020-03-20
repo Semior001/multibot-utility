@@ -12,6 +12,8 @@ import (
 const regexpAlias = "@[a-zA-Z0-9_]+"
 const aliasPrefix = "@"
 
+// todo limit on message length
+
 // GroupBot gathers usernames into one mention, like @admins
 type GroupBot struct {
 	Store              groups.Store
@@ -38,7 +40,9 @@ func (g *GroupBot) OnMessage(msg Message) *Response {
 		return nil
 	}
 
-	tokens := strings.Split(msg.Text, " ")
+	trimmed := removeRedundantWhitespaces(msg.Text)
+
+	tokens := strings.Split(trimmed, " ")
 
 	// command may be in format /cmd@bot
 	cmd := strings.Split(tokens[0], "@")[0]
@@ -100,8 +104,14 @@ func (g *GroupBot) handleTrigger(msg Message) *Response {
 		return nil
 	}
 
+	resp := strings.Builder{}
+
+	for _, u := range users {
+		_, _ = resp.WriteString(strings.ReplaceAll(u, "_", "\\_") + " ")
+	}
+
 	// composing users into one ping message
-	return &Response{Text: strings.Join(users, " ")}
+	return &Response{Text: resp.String()}
 }
 
 // addUserToGroup handles /add_user_to_group command and returns corresponding response
@@ -304,4 +314,9 @@ func unique(sl []string) []string {
 		res = append(res, s)
 	}
 	return res
+}
+
+// remove all excess whitespaces from string
+func removeRedundantWhitespaces(s string) string {
+	return strings.Join(strings.Fields(strings.TrimSpace(s)), " ")
 }
