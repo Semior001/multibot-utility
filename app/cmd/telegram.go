@@ -36,7 +36,10 @@ func (s TelegramCmd) Execute(_ []string) error {
 	t := ctrl.TelegramBotCtrl{
 		Token: s.Telegram.Token,
 		Bots: &bot.MultiBot{
-			bot.NewGroupBot(svc, true),
+			bot.NewGroupBot(bot.GroupBotParams{
+				Store:              svc,
+				RespondAllCommands: true,
+			}),
 		},
 		TbAPI:    tbapi,
 		UserName: s.Telegram.UserName,

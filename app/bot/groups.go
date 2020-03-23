@@ -14,18 +14,23 @@ const aliasPrefix = "@"
 
 // todo limit on message length
 
-// GroupBot gathers usernames into one mention, like @admins
-type GroupBot struct {
+// GroupBotParams describes all necessary parameters for correct working of GroupBot
+type GroupBotParams struct {
 	Store              groups.Store
 	RespondAllCommands bool
+	GetGroupMembers    func(chatID string) ([]User, error)
+}
+
+// GroupBot gathers usernames into one mention, like @admins
+type GroupBot struct {
+	GroupBotParams
 }
 
 // NewGroupBot initializes an instance of GroupBot
-func NewGroupBot(store groups.Store, respondAllCmds bool) *GroupBot {
+func NewGroupBot(params GroupBotParams) *GroupBot {
 	log.Print("[INFO] GroupBot instantiated")
 	return &GroupBot{
-		Store:              store,
-		RespondAllCommands: respondAllCmds,
+		GroupBotParams: params,
 	}
 }
 
@@ -90,6 +95,27 @@ func (g *GroupBot) handleTrigger(msg Message) *Response {
 	var aliases []string
 	for _, bytes := range byteOccurs {
 		aliases = append(aliases, string(bytes))
+	}
+
+	// checking whether the alias is @all and we have a callback
+	// to get group members
+	if g.GetGroupMembers != nil && contains(aliases, "@all") {
+		// adding everyone into message
+		users, err := g.GetGroupMembers(msg.ChatID)
+		if err != nil {
+			log.Printf("[WARN] failed to get group members after trigger @all %+v", err)
+			return nil
+		}
+		resp := strings.Builder{}
+
+		for _, u := range users {
+			if !u.IsBot {
+				_, _ = resp.WriteString(strings.ReplaceAll(u.Username, "_", "\\_") + " ")
+			}
+		}
+
+		// composing users into one ping message
+		return &Response{Text: resp.String()}
 	}
 
 	// look for aliases in the database

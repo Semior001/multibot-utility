@@ -19,6 +19,7 @@ type User struct {
 	Username    string // might be "" for users without usernames
 	DisplayName string
 	IsAdmin     bool
+	IsBot       bool
 }
 
 // Message to pass data from/to bot

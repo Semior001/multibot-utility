@@ -31,7 +31,7 @@ func TestGroupBot_AddGroup(t *testing.T) {
 		mock.Anything,
 	).Return(nil)
 
-	b := NewGroupBot(&mockGroupStore, false)
+	b := NewGroupBot(GroupBotParams{Store: &mockGroupStore, RespondAllCommands: false})
 
 	resp := b.OnMessage(Message{
 		From: &User{
@@ -69,7 +69,7 @@ func TestGroupBot_ListGroups(t *testing.T) {
 		"@admins_9": {"@test", "@test1", "@test2", "@test3"},
 	}, nil)
 
-	b := NewGroupBot(&mockGroupStore, false)
+	b := NewGroupBot(GroupBotParams{Store: &mockGroupStore, RespondAllCommands: false})
 
 	for i := 0; i < 10; i++ {
 		b.OnMessage(Message{
@@ -106,7 +106,7 @@ func TestGroupBot_DeleteUserFromGroup(t *testing.T) {
 		mock.Anything,
 	).Return(nil)
 
-	b := NewGroupBot(&mockGroupStore, false)
+	b := NewGroupBot(GroupBotParams{Store: &mockGroupStore, RespondAllCommands: false})
 
 	b.OnMessage(Message{
 		From: &User{
@@ -147,7 +147,7 @@ func TestGroupBot_DeleteGroup(t *testing.T) {
 		mock.Anything,
 	).Return(map[string][]string{}, nil)
 
-	b := NewGroupBot(&mockGroupStore, false)
+	b := NewGroupBot(GroupBotParams{Store: &mockGroupStore, RespondAllCommands: false})
 
 	b.OnMessage(Message{
 		From: &User{
@@ -182,7 +182,7 @@ func TestGroupBot_AddUser(t *testing.T) {
 		"@some_students",
 		"@blah",
 	).Return(nil)
-	b := NewGroupBot(&mockGroupStore, false)
+	b := NewGroupBot(GroupBotParams{Store: &mockGroupStore, RespondAllCommands: false})
 
 	resp := b.OnMessage(Message{
 		From: &User{
@@ -213,7 +213,7 @@ func TestGroupBot_Trigger(t *testing.T) {
 		mock.Anything, []string{"@kek", "@some_students"},
 	).Return([]string{"@blah", "@blah1", "@blah2", "@blah3", "@blah4"}, nil)
 
-	b := NewGroupBot(&mockGroupStore, false)
+	b := NewGroupBot(GroupBotParams{Store: &mockGroupStore, RespondAllCommands: false})
 
 	b.OnMessage(Message{
 		From: &User{
@@ -283,7 +283,7 @@ func TestGroupBot_TriggerNoAliases(t *testing.T) {
 		mock.Anything, mock.Anything,
 	).Return([]string{}, nil)
 
-	b := NewGroupBot(&mockGroupStore, false)
+	b := NewGroupBot(GroupBotParams{Store: &mockGroupStore, RespondAllCommands: false})
 
 	b.OnMessage(Message{
 		From: &User{
@@ -327,7 +327,7 @@ func TestGroupBot_IllegalArgumentsNumber(t *testing.T) {
 		"@some_students",
 		"@blah",
 	).Return(nil)
-	b := NewGroupBot(&mockGroupStore, true)
+	b := NewGroupBot(GroupBotParams{Store: &mockGroupStore, RespondAllCommands: true})
 
 	resp := b.OnMessage(Message{
 		From: &User{
@@ -377,7 +377,7 @@ func TestGroupBot_IllegalArgumentsNumber(t *testing.T) {
 	assert.Equal(t, "Not enough parameters to add group", resp.Text)
 
 	// without responding
-	b = NewGroupBot(&mockGroupStore, false)
+	b = NewGroupBot(GroupBotParams{Store: &mockGroupStore, RespondAllCommands: false})
 
 	resp = b.OnMessage(Message{
 		From: &User{
@@ -430,7 +430,7 @@ func TestGroupBot_IllegalArgumentsNumber(t *testing.T) {
 
 func TestGroupBot_IllegalAccess(t *testing.T) {
 	mockGroupStore := groups.MockStore{}
-	b := NewGroupBot(&mockGroupStore, false)
+	b := NewGroupBot(GroupBotParams{Store: &mockGroupStore, RespondAllCommands: false})
 
 	resp := b.OnMessage(Message{
 		From: &User{
@@ -473,7 +473,7 @@ func TestGroupBot_IllegalAccess(t *testing.T) {
 	assert.Equal(t, (*Response)(nil), resp)
 
 	// with responding
-	b = NewGroupBot(&mockGroupStore, true)
+	b = NewGroupBot(GroupBotParams{Store: &mockGroupStore, RespondAllCommands: true})
 	resp = b.OnMessage(Message{
 		From: &User{
 			Username:    "blah",
@@ -490,10 +490,47 @@ func TestGroupBot_AddChat(t *testing.T) {
 	mockGroupStore := groups.MockStore{}
 	mockGroupStore.On("AddChat", mock.Anything).Return(nil)
 
-	b := NewGroupBot(&mockGroupStore, false)
+	b := NewGroupBot(GroupBotParams{Store: &mockGroupStore, RespondAllCommands: false})
 	resp := b.OnMessage(Message{
 		ChatID:         "qwerty",
 		AddedBotToChat: true,
 	})
 	assert.Nil(t, resp)
+}
+
+func TestGroupBot_TriggerAll(t *testing.T) {
+	// add user
+	mockGroupStore := groups.MockStore{}
+	b := NewGroupBot(GroupBotParams{
+		Store:              &mockGroupStore,
+		RespondAllCommands: false,
+		GetGroupMembers: func(chatID string) (users []User, err error) {
+			return []User{
+				{
+					Username: "@semior001",
+					IsBot:    false,
+				},
+				{
+					Username: "@blah",
+					IsBot:    false,
+				},
+				{
+					Username: "@sMultibot",
+					IsBot:    true,
+				},
+				{
+					Username: "@blah1",
+					IsBot:    false,
+				},
+			}, nil
+		},
+	})
+	resp := b.OnMessage(Message{
+		Text: "There is a reference to @all",
+	})
+
+	assert.Contains(t, resp.Text, "@semior001")
+	assert.Contains(t, resp.Text, "@blah")
+	assert.Contains(t, resp.Text, "@blah1")
+	assert.NotContains(t, resp.Text, "@sMultibot")
 }

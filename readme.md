@@ -7,3 +7,9 @@
 <@multibot>: @user2, @user3, @user4
 <@user2>: answering
 ```
+
+## todo
+
+* [ ] thread safety
+* [ ] tests
+* [ ] CI

@@ -112,6 +112,7 @@ func (t *TelegramBotCtrl) convertMessage(msg *tgbotapi.Message) bot.Message {
 			ID:          strconv.Itoa(msg.From.ID),
 			Username:    msg.From.UserName,
 			DisplayName: msg.From.FirstName + " " + msg.From.LastName,
+			IsBot:       msg.From.IsBot,
 		}
 
 		res.From.IsAdmin = t.isUserAdmin(msg)
