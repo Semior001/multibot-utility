@@ -1,4 +1,4 @@
-[![Go Report Card](https://goreportcard.com/badge/github.com/semior001/multibot-utility)](https://goreportcard.com/report/github.com/semior001/multibot-utility) 
+[![Go Report Card](https://goreportcard.com/badge/github.com/semior001/multibot-utility)](https://goreportcard.com/report/github.com/semior001/multibot-utility) [![godoc](https://godoc.org/github.com/semior001/multibot-utility?status.svg)](https://godoc.org/github.com/Semior001/multibot-utility) 
 
 # MultibotUtility - several bots to make your life with messengers easier
 
