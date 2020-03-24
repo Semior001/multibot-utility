@@ -1,3 +1,6 @@
+// Package bot contains all bots implementations and tests to them
+// Multibot is a manager for all bots to simply distribute messages
+// to all bots
 package bot
 
 import (

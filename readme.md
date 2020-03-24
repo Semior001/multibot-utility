@@ -1,3 +1,7 @@
+[![Go Report Card](https://goreportcard.com/badge/github.com/semior001/multibot-utility)](https://goreportcard.com/report/github.com/semior001/multibot-utility) 
+
+# MultibotUtility - several bots to make your life with messengers easier
+
 ## GroupsBot - creates telegram groups to ping a group of persons
 
 ## usage
