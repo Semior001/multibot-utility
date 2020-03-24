@@ -336,7 +336,7 @@ func (g *GroupBot) prepareIllegalAccessMessage() *Response {
 	return nil
 }
 
-// removeUsersPings removes all aliasPrefix occurences from string to not ping user in chat
+// removeUsersPings removes all aliasPrefix occurrences from string to not ping user in chat
 func removeUsersPings(s string) string {
 	return strings.ReplaceAll(s, aliasPrefix, "")
 }
