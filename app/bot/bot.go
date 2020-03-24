@@ -13,6 +13,12 @@ import (
 
 //go:generate mockery -inpkg -name Bot -case snake
 
+// Bot describes a particular bot, that reacts on messages and sends whatever
+type Bot interface {
+	OnMessage(msg Message) *Response // nil if nothing to send
+	Help() string                    // returns help message - how to use this bot
+}
+
 // User defines user info of the Message
 type User struct {
 	ID          string
@@ -40,12 +46,6 @@ type Response struct {
 	Preview     bool          // enable web preview
 	Reply       bool          // message that we have to reply to, might be nil, if caused by other action
 	BanInterval time.Duration // bot banning user set the interval
-}
-
-// Bot describes a particular bot, that reacts on messages and sends whatever
-type Bot interface {
-	OnMessage(msg Message) *Response // nil if nothing to send
-	Help() string                    // returns help message - how to use this bot
 }
 
 // MultiBot is bot that delivers messages to bots that it contains

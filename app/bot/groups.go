@@ -50,7 +50,7 @@ func (g *GroupBot) OnMessage(msg Message) *Response {
 	tokens := strings.Split(trimmed, " ")
 
 	// command may be in format /cmd@bot
-	cmd := strings.Split(tokens[0], "@")[0]
+	cmd := strings.Split(tokens[0], aliasPrefix)[0]
 	args := tokens[1:]
 
 	switch cmd {
@@ -133,7 +133,7 @@ func (g *GroupBot) handleTrigger(msg Message) *Response {
 	resp := strings.Builder{}
 
 	for _, u := range users {
-		_, _ = resp.WriteString(strings.ReplaceAll(u, "_", "\\_") + " ")
+		_, _ = resp.WriteString(escapeUndersocres(u) + " ")
 	}
 
 	// composing users into one ping message
@@ -176,7 +176,7 @@ func (g *GroupBot) addUserToGroup(msg Message, args []string) *Response {
 
 	return &Response{
 		Reply: true,
-		Text:  fmt.Sprintf("User %s has been successfully added to the group %s", user, groupAlias),
+		Text:  fmt.Sprintf("User %s has been successfully added to the group %s", removeUsersPings(user), groupAlias),
 	}
 }
 
@@ -207,7 +207,11 @@ func (g *GroupBot) listGroups(msg Message, _ []string) *Response {
 	// preparing output text in format
 	// @group: @user1, @user2, ...
 	for alias, users := range groupList {
-		groupStrings = append(groupStrings, fmt.Sprintf("%s : %s", alias, strings.Join(users, ", ")))
+		groupStrings = append(groupStrings, fmt.Sprintf("%s : %s", alias,
+			removeUsersPings(escapeUndersocres(
+				strings.Join(users, ", "),
+			)),
+		))
 	}
 
 	return &Response{Reply: true, Text: strings.Join(groupStrings, "\n")}
@@ -269,7 +273,10 @@ func (g *GroupBot) deleteUserFromGroup(msg Message, args []string) *Response {
 		return nil
 	}
 
-	return &Response{Reply: true, Text: fmt.Sprintf("User %s has been successfully deleted from group %s", user, groupAlias)}
+	return &Response{
+		Reply: true,
+		Text:  fmt.Sprintf("User %s has been successfully deleted from group %s", removeUsersPings(user), groupAlias),
+	}
 }
 
 // addGroup handles /add_group command and returns corresponding response
@@ -327,6 +334,16 @@ func (g *GroupBot) prepareIllegalAccessMessage() *Response {
 		return &Response{Reply: true, Text: "You don't have admin rights to execute this command"}
 	}
 	return nil
+}
+
+// removeUsersPings removes all aliasPrefix occurences from string to not ping user in chat
+func removeUsersPings(s string) string {
+	return strings.ReplaceAll(s, aliasPrefix, "")
+}
+
+// escapeUnderscores escapes all underscores in the given string
+func escapeUndersocres(s string) string {
+	return strings.ReplaceAll(s, "_", "\\_")
 }
 
 // unique returns slice of unique string occurrences from the source one

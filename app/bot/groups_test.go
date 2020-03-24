@@ -87,7 +87,7 @@ func TestGroupBot_ListGroups(t *testing.T) {
 	})
 
 	for i := 0; i < 10; i++ {
-		assert.Contains(t, resp.Text, fmt.Sprintf("@admins_%d : @test, @test1, @test2, @test3", i))
+		assert.Contains(t, resp.Text, fmt.Sprintf("@admins_%d : test, test1, test2, test3", i))
 	}
 }
 
@@ -126,7 +126,7 @@ func TestGroupBot_DeleteUserFromGroup(t *testing.T) {
 		Text: "/delete_user_from_group @admins @test1",
 	})
 
-	assert.Equal(t, "User @test1 has been successfully deleted from group @admins", resp.Text)
+	assert.Equal(t, "User test1 has been successfully deleted from group @admins", resp.Text)
 }
 
 func TestGroupBot_DeleteGroup(t *testing.T) {
@@ -193,7 +193,7 @@ func TestGroupBot_AddUser(t *testing.T) {
 		Text: "/add_user_to_group @some_students @blah",
 	})
 
-	assert.Equal(t, "User @blah has been successfully added to the group @some_students", resp.Text)
+	assert.Equal(t, "User blah has been successfully added to the group @some_students", resp.Text)
 }
 
 func TestGroupBot_Trigger(t *testing.T) {
@@ -533,4 +533,14 @@ func TestGroupBot_TriggerAll(t *testing.T) {
 	assert.Contains(t, resp.Text, "@blah")
 	assert.Contains(t, resp.Text, "@blah1")
 	assert.NotContains(t, resp.Text, "@sMultibot")
+}
+
+func TestGroupBot_removeUsersPings(t *testing.T) {
+	res := removeUsersPings("@semior001 @blah @foo")
+	assert.NotContains(t, res, "@")
+}
+
+func TestGroupBot_escapeUnderscores(t *testing.T) {
+	res := escapeUndersocres("@semior_001 @blah__ @foo__")
+	assert.Equal(t, `@semior\_001 @blah\_\_ @foo\_\_`, res)
 }
