@@ -166,5 +166,15 @@ func chatMemberContainsUsername(members []tgbotapi.ChatMember, username string) 
 
 // isBotAddedToChat checks that this bot was added to the new chat
 func (t *TelegramBotCtrl) isBotAddedToChat(newMembers *[]tgbotapi.User) bool {
-	return newMembers != nil && len(*newMembers) == 1 && (*newMembers)[0].IsBot && (*newMembers)[0].UserName == t.UserName
+	if newMembers == nil {
+		return false
+	}
+
+	for _, u := range *newMembers {
+		if u.IsBot && u.UserName == t.UserName {
+			return true
+		}
+	}
+
+	return false
 }
