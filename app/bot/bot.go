@@ -14,6 +14,17 @@ import (
 	"github.com/go-pkgz/syncs"
 )
 
+// ChatType describes type of the chat, where the message
+// came from
+type ChatType int
+
+// All recognizable chat types
+const (
+	ChatTypePrivate = 0
+	ChatTypeGroup   = 1
+	ChatTypeChannel = 2
+)
+
 //go:generate mockery -inpkg -name Bot -case snake
 
 // Bot describes a particular bot, that reacts on messages and sends whatever
@@ -35,6 +46,7 @@ type User struct {
 type Message struct {
 	ID             string
 	ChatID         string
+	ChatType       ChatType
 	From           *User
 	Sent           time.Time
 	Text           string `json:",omitempty"`

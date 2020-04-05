@@ -36,6 +36,11 @@ func NewGroupBot(params GroupBotParams) *GroupBot {
 
 // OnMessage receives any commands, that are listed in help and group aliases
 func (g *GroupBot) OnMessage(msg Message) *Response {
+	// ignore all non-group messages
+	if msg.ChatType != ChatTypeGroup {
+		return nil
+	}
+
 	// first, is it a current bot addition
 	if msg.AddedBotToChat {
 		err := g.Store.AddChat(msg.ChatID)

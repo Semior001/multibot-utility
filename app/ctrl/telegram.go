@@ -107,6 +107,19 @@ func (t *TelegramBotCtrl) convertMessage(msg *tgbotapi.Message) bot.Message {
 		Text:   msg.Text,
 	}
 
+	// taking the type of chat, where the message came from
+	if msg.Chat.IsGroup() || msg.Chat.IsSuperGroup() {
+		res.ChatType = bot.ChatTypeGroup
+	}
+
+	if msg.Chat.IsChannel() {
+		res.ChatType = bot.ChatTypeChannel
+	}
+
+	if msg.Chat.IsPrivate() {
+		res.ChatType = bot.ChatTypePrivate
+	}
+
 	if msg.From != nil {
 		res.From = &bot.User{
 			ID:          strconv.Itoa(msg.From.ID),

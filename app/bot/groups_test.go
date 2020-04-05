@@ -34,6 +34,7 @@ func TestGroupBot_AddGroup(t *testing.T) {
 	b := NewGroupBot(GroupBotParams{Store: &mockGroupStore, RespondAllCommands: false})
 
 	resp := b.OnMessage(Message{
+		ChatType: ChatTypeGroup,
 		From: &User{
 			Username:    "blah",
 			DisplayName: "blahblah",
@@ -73,6 +74,7 @@ func TestGroupBot_ListGroups(t *testing.T) {
 
 	for i := 0; i < 10; i++ {
 		b.OnMessage(Message{
+			ChatType: ChatTypeGroup,
 			From: &User{
 				Username:    "blah",
 				DisplayName: "blahblah",
@@ -83,7 +85,8 @@ func TestGroupBot_ListGroups(t *testing.T) {
 	}
 
 	resp := b.OnMessage(Message{
-		Text: "/list_groups",
+		ChatType: ChatTypeGroup,
+		Text:     "/list_groups",
 	})
 
 	for i := 0; i < 10; i++ {
@@ -109,6 +112,7 @@ func TestGroupBot_DeleteUserFromGroup(t *testing.T) {
 	b := NewGroupBot(GroupBotParams{Store: &mockGroupStore, RespondAllCommands: false})
 
 	b.OnMessage(Message{
+		ChatType: ChatTypeGroup,
 		From: &User{
 			Username:    "blah",
 			DisplayName: "blahblah",
@@ -118,6 +122,7 @@ func TestGroupBot_DeleteUserFromGroup(t *testing.T) {
 	})
 
 	resp := b.OnMessage(Message{
+		ChatType: ChatTypeGroup,
 		From: &User{
 			Username:    "blah",
 			DisplayName: "blahblah",
@@ -150,6 +155,7 @@ func TestGroupBot_DeleteGroup(t *testing.T) {
 	b := NewGroupBot(GroupBotParams{Store: &mockGroupStore, RespondAllCommands: false})
 
 	b.OnMessage(Message{
+		ChatType: ChatTypeGroup,
 		From: &User{
 			Username:    "blah",
 			DisplayName: "blahblah",
@@ -158,7 +164,7 @@ func TestGroupBot_DeleteGroup(t *testing.T) {
 		Text: "/add_group @admins @test @test1 @test2 @test3",
 	})
 
-	resp := b.OnMessage(Message{
+	resp := b.OnMessage(Message{ChatType: ChatTypeGroup,
 		From: &User{
 			Username:    "blah",
 			DisplayName: "blahblah",
@@ -169,7 +175,8 @@ func TestGroupBot_DeleteGroup(t *testing.T) {
 	assert.Equal(t, "Group @admins has been successfully deleted", resp.Text)
 
 	resp = b.OnMessage(Message{
-		Text: "/list_groups",
+		ChatType: ChatTypeGroup,
+		Text:     "/list_groups",
 	})
 	assert.Equal(t, "There's no groups in this chat yet", resp.Text)
 }
@@ -185,6 +192,7 @@ func TestGroupBot_AddUser(t *testing.T) {
 	b := NewGroupBot(GroupBotParams{Store: &mockGroupStore, RespondAllCommands: false})
 
 	resp := b.OnMessage(Message{
+		ChatType: ChatTypeGroup,
 		From: &User{
 			Username:    "blah",
 			DisplayName: "blahblah",
@@ -216,6 +224,7 @@ func TestGroupBot_Trigger(t *testing.T) {
 	b := NewGroupBot(GroupBotParams{Store: &mockGroupStore, RespondAllCommands: false})
 
 	b.OnMessage(Message{
+		ChatType: ChatTypeGroup,
 		From: &User{
 			Username:    "blah",
 			DisplayName: "blahblah",
@@ -224,7 +233,7 @@ func TestGroupBot_Trigger(t *testing.T) {
 		Text: "/add_group @some_students @blah @blah1 @blah2",
 	})
 
-	b.OnMessage(Message{
+	b.OnMessage(Message{ChatType: ChatTypeGroup,
 		From: &User{
 			Username:    "blah",
 			DisplayName: "blahblah",
@@ -234,6 +243,7 @@ func TestGroupBot_Trigger(t *testing.T) {
 	})
 
 	b.OnMessage(Message{
+		ChatType: ChatTypeGroup,
 		From: &User{
 			Username:    "blah",
 			DisplayName: "blahblah",
@@ -243,7 +253,8 @@ func TestGroupBot_Trigger(t *testing.T) {
 	})
 
 	resp := b.OnMessage(Message{
-		Text: "There is a reference to @some_students and @kek",
+		ChatType: ChatTypeGroup,
+		Text:     "There is a reference to @some_students and @kek",
 	})
 
 	assert.Contains(t, resp.Text, "@blah")
@@ -286,6 +297,7 @@ func TestGroupBot_TriggerNoAliases(t *testing.T) {
 	b := NewGroupBot(GroupBotParams{Store: &mockGroupStore, RespondAllCommands: false})
 
 	b.OnMessage(Message{
+		ChatType: ChatTypeGroup,
 		From: &User{
 			Username:    "blah",
 			DisplayName: "blahblah",
@@ -295,6 +307,7 @@ func TestGroupBot_TriggerNoAliases(t *testing.T) {
 	})
 
 	b.OnMessage(Message{
+		ChatType: ChatTypeGroup,
 		From: &User{
 			Username:    "blah",
 			DisplayName: "blahblah",
@@ -304,6 +317,7 @@ func TestGroupBot_TriggerNoAliases(t *testing.T) {
 	})
 
 	b.OnMessage(Message{
+		ChatType: ChatTypeGroup,
 		From: &User{
 			Username:    "blah",
 			DisplayName: "blahblah",
@@ -313,7 +327,8 @@ func TestGroupBot_TriggerNoAliases(t *testing.T) {
 	})
 
 	resp := b.OnMessage(Message{
-		Text: "There is a reference to nobody",
+		ChatType: ChatTypeGroup,
+		Text:     "There is a reference to nobody",
 	})
 	assert.Nil(t, resp)
 }
@@ -330,6 +345,7 @@ func TestGroupBot_IllegalArgumentsNumber(t *testing.T) {
 	b := NewGroupBot(GroupBotParams{Store: &mockGroupStore, RespondAllCommands: true})
 
 	resp := b.OnMessage(Message{
+		ChatType: ChatTypeGroup,
 		From: &User{
 			Username:    "blah",
 			DisplayName: "blahblah",
@@ -342,6 +358,7 @@ func TestGroupBot_IllegalArgumentsNumber(t *testing.T) {
 
 	// delete user from group
 	resp = b.OnMessage(Message{
+		ChatType: ChatTypeGroup,
 		From: &User{
 			Username:    "blah",
 			DisplayName: "blahblah",
@@ -354,6 +371,7 @@ func TestGroupBot_IllegalArgumentsNumber(t *testing.T) {
 
 	// delete group
 	resp = b.OnMessage(Message{
+		ChatType: ChatTypeGroup,
 		From: &User{
 			Username:    "blah",
 			DisplayName: "blahblah",
@@ -366,6 +384,7 @@ func TestGroupBot_IllegalArgumentsNumber(t *testing.T) {
 
 	// add group
 	resp = b.OnMessage(Message{
+		ChatType: ChatTypeGroup,
 		From: &User{
 			Username:    "blah",
 			DisplayName: "blahblah",
@@ -380,6 +399,7 @@ func TestGroupBot_IllegalArgumentsNumber(t *testing.T) {
 	b = NewGroupBot(GroupBotParams{Store: &mockGroupStore, RespondAllCommands: false})
 
 	resp = b.OnMessage(Message{
+		ChatType: ChatTypeGroup,
 		From: &User{
 			Username:    "blah",
 			DisplayName: "blahblah",
@@ -392,6 +412,7 @@ func TestGroupBot_IllegalArgumentsNumber(t *testing.T) {
 
 	// delete user from group
 	resp = b.OnMessage(Message{
+		ChatType: ChatTypeGroup,
 		From: &User{
 			Username:    "blah",
 			DisplayName: "blahblah",
@@ -404,6 +425,7 @@ func TestGroupBot_IllegalArgumentsNumber(t *testing.T) {
 
 	// delete group
 	resp = b.OnMessage(Message{
+		ChatType: ChatTypeGroup,
 		From: &User{
 			Username:    "blah",
 			DisplayName: "blahblah",
@@ -416,6 +438,7 @@ func TestGroupBot_IllegalArgumentsNumber(t *testing.T) {
 
 	// add group
 	resp = b.OnMessage(Message{
+		ChatType: ChatTypeGroup,
 		From: &User{
 			Username:    "blah",
 			DisplayName: "blahblah",
@@ -433,6 +456,7 @@ func TestGroupBot_IllegalAccess(t *testing.T) {
 	b := NewGroupBot(GroupBotParams{Store: &mockGroupStore, RespondAllCommands: false})
 
 	resp := b.OnMessage(Message{
+		ChatType: ChatTypeGroup,
 		From: &User{
 			Username:    "blah",
 			DisplayName: "blahblah",
@@ -443,6 +467,7 @@ func TestGroupBot_IllegalAccess(t *testing.T) {
 	assert.Equal(t, (*Response)(nil), resp)
 
 	resp = b.OnMessage(Message{
+		ChatType: ChatTypeGroup,
 		From: &User{
 			Username:    "blah",
 			DisplayName: "blahblah",
@@ -453,6 +478,7 @@ func TestGroupBot_IllegalAccess(t *testing.T) {
 	assert.Equal(t, (*Response)(nil), resp)
 
 	resp = b.OnMessage(Message{
+		ChatType: ChatTypeGroup,
 		From: &User{
 			Username:    "blah",
 			DisplayName: "blahblah",
@@ -463,6 +489,7 @@ func TestGroupBot_IllegalAccess(t *testing.T) {
 	assert.Equal(t, (*Response)(nil), resp)
 
 	resp = b.OnMessage(Message{
+		ChatType: ChatTypeGroup,
 		From: &User{
 			Username:    "blah",
 			DisplayName: "blahblah",
@@ -475,6 +502,7 @@ func TestGroupBot_IllegalAccess(t *testing.T) {
 	// with responding
 	b = NewGroupBot(GroupBotParams{Store: &mockGroupStore, RespondAllCommands: true})
 	resp = b.OnMessage(Message{
+		ChatType: ChatTypeGroup,
 		From: &User{
 			Username:    "blah",
 			DisplayName: "blahblah",
@@ -492,6 +520,7 @@ func TestGroupBot_AddChat(t *testing.T) {
 
 	b := NewGroupBot(GroupBotParams{Store: &mockGroupStore, RespondAllCommands: false})
 	resp := b.OnMessage(Message{
+		ChatType:       ChatTypeGroup,
 		ChatID:         "qwerty",
 		AddedBotToChat: true,
 	})
@@ -526,7 +555,8 @@ func TestGroupBot_TriggerAll(t *testing.T) {
 		},
 	})
 	resp := b.OnMessage(Message{
-		Text: "There is a reference to @all",
+		ChatType: ChatTypeGroup,
+		Text:     "There is a reference to @all",
 	})
 
 	assert.Contains(t, resp.Text, "@semior001")
@@ -543,4 +573,16 @@ func TestGroupBot_removeUsersPings(t *testing.T) {
 func TestGroupBot_escapeUnderscores(t *testing.T) {
 	res := escapeUndersocres("@semior_001 @blah__ @foo__")
 	assert.Equal(t, `@semior\_001 @blah\_\_ @foo\_\_`, res)
+}
+
+func TestGroupBot_ignoreMsgNotFromChat(t *testing.T) {
+	b := &GroupBot{}
+	resp := b.OnMessage(Message{
+		ChatType: ChatTypePrivate,
+	})
+	assert.Nil(t, resp)
+	resp = b.OnMessage(Message{
+		ChatType: ChatTypeChannel,
+	})
+	assert.Nil(t, resp)
 }
