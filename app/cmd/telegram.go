@@ -41,7 +41,7 @@ func (s TelegramCmd) Execute(_ []string) error {
 				RespondAllCommands: true,
 			}),
 		},
-		TbAPI:    tbapi,
+		API:      tbapi,
 		UserName: s.Telegram.UserName,
 	}
 	err = t.Run(context.TODO())
