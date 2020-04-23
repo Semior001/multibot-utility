@@ -82,7 +82,7 @@ func (m *MultiBot) OnMessage(msg Message) *Response {
 	var unpin int32
 	var preview int32
 	var reply int32
-	var banInterval time.Duration = 0
+	var banInterval time.Duration
 
 	var mutex = &sync.Mutex{}
 
