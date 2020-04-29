@@ -14,9 +14,10 @@ import (
 )
 
 func TestGroupBot_Help(t *testing.T) {
-	require.Equal(t, `/add\_group @group\_alias @user1, @user2, ... - add user
+	require.Equal(t, `Groups bot - gathers usernames into one mention, like @admins
+/add\_group @group\_alias @user1, @user2, ... - add user
 /delete\_user\_from\_group @group\_alias @user - removes user from the group
-/detete\_group @group\_alias - removes group
+/delete\_group @group\_alias - removes group
 /list\_groups - shows the list of existing groups
 /add\_user\_to\_group @group\_alias @user - adds user to the specified group
 @group\_alias - triggers bot to send message with all participants of the group`, (&GroupBot{}).Help())
