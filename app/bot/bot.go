@@ -4,14 +4,11 @@
 package bot
 
 import (
-	"context"
 	"log"
 	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
-
-	"github.com/go-pkgz/syncs"
 )
 
 // ChatType describes type of the chat, where the message
@@ -75,9 +72,9 @@ func (m *MultiBot) OnMessage(msg Message) *Response {
 		}
 	}
 
-	wg := syncs.NewSizedGroup(4)
+	wg := sync.WaitGroup{}
 
-	texts := make(chan string)
+	texts := make(chan string, len(*m))
 	var pin int32
 	var unpin int32
 	var preview int32
@@ -86,12 +83,11 @@ func (m *MultiBot) OnMessage(msg Message) *Response {
 
 	var mutex = &sync.Mutex{}
 
+	wg.Add(len(*m))
+
 	for _, bot := range *m {
-		// if we pass the variable into the goroutine, all goroutines
-		// will take the same variable, bot is a SINGLE variable
 		bot := bot
-		// declaring goroutine
-		wg.Go(func(ctx context.Context) {
+		go func() {
 			if resp := bot.OnMessage(msg); resp != nil {
 				texts <- resp.Text
 				if resp.Pin {
@@ -112,7 +108,8 @@ func (m *MultiBot) OnMessage(msg Message) *Response {
 					mutex.Unlock()
 				}
 			}
-		})
+			wg.Done()
+		}()
 	}
 
 	go func() {
