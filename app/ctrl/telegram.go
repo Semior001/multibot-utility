@@ -148,7 +148,7 @@ func (t *TelegramBotCtrl) convertMessage(msg *tgbotapi.Message) bot.Message {
 	}
 
 	// checking that it is a bot addition
-	if t.isBotAddedToChat(msg.NewChatMembers) {
+	if t.isBotAddedToChat(msg) {
 		res.AddedBotToChat = true
 	}
 
@@ -194,12 +194,18 @@ func chatMemberContainsUsername(members []tgbotapi.ChatMember, username string) 
 }
 
 // isBotAddedToChat checks that this bot was added to the new chat
-func (t *TelegramBotCtrl) isBotAddedToChat(newMembers *[]tgbotapi.User) bool {
-	if newMembers == nil {
+func (t *TelegramBotCtrl) isBotAddedToChat(msg *tgbotapi.Message) bool {
+	// for private messages
+	if msg.Text == "/start" {
+		return true
+	}
+
+	// for group messages
+	if msg.NewChatMembers == nil {
 		return false
 	}
 
-	for _, u := range *newMembers {
+	for _, u := range *msg.NewChatMembers {
 		if u.IsBot && u.UserName == t.UserName {
 			return true
 		}
