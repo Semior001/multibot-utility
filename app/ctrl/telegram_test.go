@@ -127,6 +127,34 @@ func TestTelegramBotCtrl_convertMessage(t *testing.T) {
 	}
 	assert.Equal(t, expected, ctrl.convertMessage(msg), "added bot to chat")
 
+	expected = bot.Message{
+		ID:       "555",
+		ChatID:   "666",
+		ChatType: bot.ChatTypeGroup,
+		Sent:     time.Unix(1587732716, 0),
+		Text:     "/start",
+		From: &bot.User{
+			ID:          "456",
+			Username:    "semior001",
+			DisplayName: "Yelshat Duskaliyev",
+		},
+		AddedBotToChat: true,
+	}
+	msg = &tgbotapi.Message{
+		MessageID: 555,
+		Chat:      &tgbotapi.Chat{ID: 666, Type: "group"},
+		From: &tgbotapi.User{
+			ID:        456,
+			FirstName: "Yelshat",
+			LastName:  "Duskaliyev",
+			UserName:  "semior001",
+			IsBot:     false,
+		},
+		Date: 1587732716,
+		Text: "/start",
+	}
+	assert.Equal(t, expected, ctrl.convertMessage(msg), "added bot to chat with /start")
+
 	msg = &tgbotapi.Message{
 		MessageID: 123,
 		Chat: &tgbotapi.Chat{
