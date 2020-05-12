@@ -8,7 +8,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/Semior001/multibotUtility/app/store/groups"
+	"github.com/Semior001/multibot-utility/app/store/groups"
 
 	"github.com/stretchr/testify/require"
 )

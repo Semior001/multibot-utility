@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/Semior001/multibotUtility/app/bot"
+	"github.com/Semior001/multibot-utility/app/bot"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/pkg/errors"
 )

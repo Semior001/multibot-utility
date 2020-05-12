@@ -7,7 +7,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/Semior001/multibotUtility/app/cmd"
+	"github.com/Semior001/multibot-utility/app/cmd"
 	"github.com/hashicorp/logutils"
 	"github.com/jessevdk/go-flags"
 )

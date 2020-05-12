@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
-	"github.com/Semior001/multibotUtility/app/bot"
+	"github.com/Semior001/multibot-utility/app/bot"
 )
 
 func TestTelegramBotCtrl_RunWithNoBots(t *testing.T) {

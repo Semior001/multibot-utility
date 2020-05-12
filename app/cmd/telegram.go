@@ -6,9 +6,9 @@ import (
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 
-	"github.com/Semior001/multibotUtility/app/bot"
-	"github.com/Semior001/multibotUtility/app/ctrl"
-	"github.com/Semior001/multibotUtility/app/store/groups"
+	"github.com/Semior001/multibot-utility/app/bot"
+	"github.com/Semior001/multibot-utility/app/ctrl"
+	"github.com/Semior001/multibot-utility/app/store/groups"
 	bolt "github.com/coreos/bbolt"
 )
 

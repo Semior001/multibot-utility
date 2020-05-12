@@ -6,7 +6,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/Semior001/multibotUtility/app/store/groups"
+	"github.com/Semior001/multibot-utility/app/store/groups"
 )
 
 const regexpAlias = "@[a-zA-Z0-9_]+"
@@ -41,10 +41,9 @@ func (g *GroupBot) OnMessage(msg Message) *Response {
 		return nil
 	}
 
-	// first, is it a current bot addition
+	// if bot has been added to chat, we have to save this chat in the storage
 	if msg.AddedBotToChat {
-		err := g.Store.AddChat(msg.ChatID)
-		if err != nil {
+		if err := g.Store.AddChat(msg.ChatID); err != nil {
 			log.Printf("[WARN] error while adding chat to store: %+v", err)
 		}
 		return nil
@@ -55,6 +54,7 @@ func (g *GroupBot) OnMessage(msg Message) *Response {
 	tokens := strings.Split(trimmed, " ")
 
 	// command may be in format /cmd@bot
+	// todo if user wanted to ping other bot - we should not react
 	cmd := strings.Split(tokens[0], aliasPrefix)[0]
 	args := tokens[1:]
 

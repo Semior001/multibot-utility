@@ -1,4 +1,4 @@
-module github.com/Semior001/multibotUtility
+module github.com/Semior001/multibot-utility
 
 go 1.14
 
