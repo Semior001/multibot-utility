@@ -138,7 +138,7 @@ func (g *GroupBot) handleTrigger(msg Message) *Response {
 	resp := strings.Builder{}
 
 	for _, u := range users {
-		_, _ = resp.WriteString(escapeUndersocres(u) + " ")
+		_, _ = resp.WriteString(escapeUnderscores(u) + " ")
 	}
 
 	// composing users into one ping message
@@ -213,7 +213,7 @@ func (g *GroupBot) listGroups(msg Message, _ []string) *Response {
 	// @group: @user1, @user2, ...
 	for alias, users := range groupList {
 		groupStrings = append(groupStrings, fmt.Sprintf("%s : %s", alias,
-			removeUsersPings(escapeUndersocres(
+			removeUsersPings(escapeUnderscores(
 				strings.Join(users, ", "),
 			)),
 		))
@@ -348,7 +348,7 @@ func removeUsersPings(s string) string {
 }
 
 // escapeUnderscores escapes all underscores in the given string
-func escapeUndersocres(s string) string {
+func escapeUnderscores(s string) string {
 	return strings.ReplaceAll(s, "_", "\\_")
 }
 

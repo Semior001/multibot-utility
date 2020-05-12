@@ -572,7 +572,7 @@ func TestGroupBot_removeUsersPings(t *testing.T) {
 }
 
 func TestGroupBot_escapeUnderscores(t *testing.T) {
-	res := escapeUndersocres("@semior_001 @blah__ @foo__")
+	res := escapeUnderscores("@semior_001 @blah__ @foo__")
 	assert.Equal(t, `@semior\_001 @blah\_\_ @foo\_\_`, res)
 }
 
