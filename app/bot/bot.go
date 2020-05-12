@@ -60,6 +60,11 @@ type Response struct {
 	BanInterval time.Duration // bot banning user set the interval
 }
 
+// IsEmpty checks that response is empty and we do not have to send it
+func (r Response) IsEmpty() bool {
+	return r.Text == "" && !r.Pin && !r.Unpin && !r.Preview && !r.Reply && r.BanInterval > 0
+}
+
 // MultiBot is bot that delivers messages to bots that it contains
 type MultiBot []Bot
 
@@ -119,17 +124,16 @@ func (m *MultiBot) OnMessage(msg Message) *Response {
 
 	var lines []string
 	for r := range texts {
+		if strings.TrimSpace(r) == "" {
+			continue
+		}
 		log.Printf("[DEBUG] compose %q", r)
 		lines = append(lines, r)
 	}
 
 	log.Printf("[DEBUG] answers %d, send %v", len(lines), len(lines) > 0)
 
-	if len(lines) <= 0 {
-		return nil
-	}
-
-	return &Response{
+	resp := Response{
 		Text:        strings.Join(lines, "\n"),
 		Pin:         atomic.LoadInt32(&pin) > 0,
 		Unpin:       atomic.LoadInt32(&unpin) > 0,
@@ -137,6 +141,12 @@ func (m *MultiBot) OnMessage(msg Message) *Response {
 		Reply:       atomic.LoadInt32(&reply) > 0,
 		BanInterval: banInterval,
 	}
+
+	if resp.IsEmpty() {
+		return nil
+	}
+
+	return &resp
 }
 
 // Help composes help from all bots

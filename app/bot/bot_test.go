@@ -23,6 +23,19 @@ func TestMultiBot_Help(t *testing.T) {
 
 func TestMultiBot_OnMessage(t *testing.T) {
 	mockBot := MockBot{}
+	bot := MultiBot{
+		&mockBot,
+	}
+
+	mockBot.On("OnMessage", mock.MatchedBy(func(msg Message) bool {
+		return msg.Text == "blah"
+	})).Return(&Response{
+		BanInterval: 999,
+	})
+	assert.Nil(t, bot.OnMessage(Message{
+		Text: "blah",
+	}))
+
 	mockBot.On("OnMessage", mock.Anything).Return(&Response{
 		Text:        "foo",
 		Pin:         true,
@@ -31,9 +44,6 @@ func TestMultiBot_OnMessage(t *testing.T) {
 		Reply:       true,
 		BanInterval: 999,
 	})
-	bot := MultiBot{
-		&mockBot,
-	}
 	assert.Equal(t, &Response{
 		Text:        "foo",
 		Pin:         true,
