@@ -5,6 +5,7 @@ go 1.14
 require (
 	github.com/coreos/bbolt v1.3.3
 	github.com/go-telegram-bot-api/telegram-bot-api v4.6.4+incompatible
+	github.com/google/uuid v1.1.1
 	github.com/hashicorp/logutils v1.0.0
 	github.com/jessevdk/go-flags v1.4.0
 	github.com/pkg/errors v0.9.1

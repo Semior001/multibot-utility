@@ -173,3 +173,47 @@ func contains(s []string, e string) bool {
 	}
 	return false
 }
+
+// escapeUnderscores escapes all underscores in the given string
+func escapeUnderscores(s string) string {
+	return strings.ReplaceAll(s, "_", "\\_")
+}
+
+// unique returns slice of unique string occurrences from the source one
+func unique(sl []string) []string {
+	m := make(map[string]struct{})
+	for _, s := range sl {
+		m[s] = struct{}{}
+	}
+	var res []string
+	for s := range m {
+		res = append(res, s)
+	}
+	return res
+}
+
+// remove all excess whitespaces from string
+func removeRedundantWhitespaces(s string) string {
+	return strings.Join(strings.Fields(strings.TrimSpace(s)), " ")
+}
+
+// prepareIllegalAccessMessage creates a response to the illegal
+// command execution - if in bot parameters defined to respond all
+// commands - it will return a message, otherwise - nothing
+func prepareIllegalAccessMessage(respondAllCommands bool) *Response {
+	if respondAllCommands {
+		return &Response{Reply: true, Text: "You don't have admin rights to execute this command"}
+	}
+	return nil
+}
+
+// parseCmd parses message into command and arguments
+// it requires already trimmed text
+func parseCmd(msgText string) (cmd string, args []string) {
+	// it is a command, split it into tokens
+	tokens := strings.Split(msgText, " ")
+
+	// command may be in format /cmd@bot
+	// todo if user wanted to ping other bot - we should not react
+	return strings.Split(tokens[0], aliasPrefix)[0], tokens[1:]
+}

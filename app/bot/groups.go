@@ -44,45 +44,45 @@ func (g *GroupBot) OnMessage(msg Message) *Response {
 	// if bot has been added to chat, we have to save this chat in the storage
 	if msg.AddedBotToChat {
 		if err := g.Store.AddChat(msg.ChatID); err != nil {
-			log.Printf("[WARN] error while adding chat to store: %+v", err)
+			log.Printf("[WARN] error while adding chat to store: %v", err)
 		}
 		return nil
 	}
 
 	trimmed := removeRedundantWhitespaces(msg.Text)
 
-	tokens := strings.Split(trimmed, " ")
+	// if it is not a command, we have to just look for triggers
+	if !strings.HasPrefix(msg.Text, "/") {
+		return g.handleTrigger(msg)
+	}
 
-	// command may be in format /cmd@bot
-	// todo if user wanted to ping other bot - we should not react
-	cmd := strings.Split(tokens[0], aliasPrefix)[0]
-	args := tokens[1:]
+	cmd, args := parseCmd(trimmed)
 
 	switch cmd {
 	case "/add_group":
 		if !msg.From.IsAdmin {
-			return g.prepareIllegalAccessMessage()
+			return prepareIllegalAccessMessage(g.RespondAllCommands)
 		}
 		return g.addGroup(msg, args)
 	case "/delete_user_from_group":
 		if !msg.From.IsAdmin {
-			return g.prepareIllegalAccessMessage()
+			return prepareIllegalAccessMessage(g.RespondAllCommands)
 		}
 		return g.deleteUserFromGroup(msg, args)
 	case "/delete_group":
 		if !msg.From.IsAdmin {
-			return g.prepareIllegalAccessMessage()
+			return prepareIllegalAccessMessage(g.RespondAllCommands)
 		}
 		return g.deleteGroup(msg, args)
 	case "/list_groups":
 		return g.listGroups(msg, args)
 	case "/add_user_to_group":
 		if !msg.From.IsAdmin {
-			return g.prepareIllegalAccessMessage()
+			return prepareIllegalAccessMessage(g.RespondAllCommands)
 		}
 		return g.addUserToGroup(msg, args)
 	}
-	return g.handleTrigger(msg)
+	return nil
 }
 
 // handleTrigger checks the text for existence of group alias and,
@@ -91,7 +91,7 @@ func (g *GroupBot) handleTrigger(msg Message) *Response {
 	// taking all occurrences of aliases, e.g. @admins or @semior001
 	seeker, err := regexp.Compile(regexpAlias)
 	if err != nil {
-		log.Printf("[WARN] error while looking for alias trigger: %+v", err)
+		log.Printf("[WARN] error while looking for alias trigger: %v", err)
 		return nil
 	}
 	byteOccurs := seeker.FindAll([]byte(msg.Text), -1)
@@ -108,7 +108,7 @@ func (g *GroupBot) handleTrigger(msg Message) *Response {
 		// adding everyone into message
 		users, err := g.GetGroupMembers(msg.ChatID)
 		if err != nil {
-			log.Printf("[WARN] failed to get group members after trigger @all %+v", err)
+			log.Printf("[WARN] failed to get group members after trigger @all %v", err)
 			return nil
 		}
 		resp := strings.Builder{}
@@ -126,7 +126,7 @@ func (g *GroupBot) handleTrigger(msg Message) *Response {
 	// look for aliases in the database
 	users, err := g.Store.FindAliases(msg.ChatID, unique(aliases))
 	if err != nil {
-		log.Printf("[WARN] error while looking for alias trigger %+v", err)
+		log.Printf("[WARN] error while looking for alias trigger %v", err)
 		return nil
 	}
 
@@ -169,7 +169,7 @@ func (g *GroupBot) addUserToGroup(msg Message, args []string) *Response {
 
 	err := g.Store.AddUser(msg.ChatID, groupAlias, user)
 	if err != nil {
-		log.Printf("[WARN] error while adding user to the group %s:%s: %+v", msg.ChatID, groupAlias, err)
+		log.Printf("[WARN] error while adding user to the group %s:%s: %v", msg.ChatID, groupAlias, err)
 		if g.RespondAllCommands {
 			return &Response{
 				Reply: true,
@@ -192,7 +192,7 @@ func (g *GroupBot) addUserToGroup(msg Message, args []string) *Response {
 func (g *GroupBot) listGroups(msg Message, _ []string) *Response {
 	groupList, err := g.Store.GetGroups(msg.ChatID)
 	if err != nil {
-		log.Printf("[WARN] error while listing groups of chat %s: %+v", msg.ChatID, err)
+		log.Printf("[WARN] error while listing groups of chat %s: %v", msg.ChatID, err)
 		if g.RespondAllCommands {
 			return &Response{
 				Reply: true,
@@ -238,7 +238,7 @@ func (g *GroupBot) deleteGroup(msg Message, args []string) *Response {
 	groupAlias := args[0]
 	err := g.Store.DeleteGroup(msg.ChatID, groupAlias)
 	if err != nil {
-		log.Printf("[WARN] error while deleting group %s:%s: %+v", msg.ChatID, groupAlias, err)
+		log.Printf("[WARN] error while deleting group %s:%s: %v", msg.ChatID, groupAlias, err)
 		if g.RespondAllCommands {
 			return &Response{
 				Reply: true,
@@ -268,7 +268,7 @@ func (g *GroupBot) deleteUserFromGroup(msg Message, args []string) *Response {
 
 	err := g.Store.DeleteUserFromGroup(msg.ChatID, groupAlias, user)
 	if err != nil {
-		log.Printf("[WARN] error while deleting user from group %s:%s: %+v", msg.ChatID, groupAlias, err)
+		log.Printf("[WARN] error while deleting user from group %s:%s: %v", msg.ChatID, groupAlias, err)
 		if g.RespondAllCommands {
 			return &Response{
 				Reply: true,
@@ -308,7 +308,7 @@ func (g *GroupBot) addGroup(msg Message, args []string) *Response {
 
 	err := g.Store.PutGroup(msg.ChatID, groupAlias, users)
 	if err != nil {
-		log.Printf("[WARN] error while adding group alias %s:%s: %+v", msg.ChatID, groupAlias, err)
+		log.Printf("[WARN] error while adding group alias %s:%s: %v", msg.ChatID, groupAlias, err)
 		if g.RespondAllCommands {
 			return &Response{
 				Reply: true,
@@ -332,40 +332,7 @@ func (g *GroupBot) Help() string {
 @group\_alias - triggers bot to send message with all participants of the group`
 }
 
-// prepareIllegalAccessMessage creates a response to the illegal
-// command execution - if in bot parameters defined to respond all
-// commands - it will return a message, otherwise - nothing
-func (g *GroupBot) prepareIllegalAccessMessage() *Response {
-	if g.RespondAllCommands {
-		return &Response{Reply: true, Text: "You don't have admin rights to execute this command"}
-	}
-	return nil
-}
-
 // removeUsersPings removes all aliasPrefix occurrences from string to not ping user in chat
 func removeUsersPings(s string) string {
 	return strings.ReplaceAll(s, aliasPrefix, "")
-}
-
-// escapeUnderscores escapes all underscores in the given string
-func escapeUnderscores(s string) string {
-	return strings.ReplaceAll(s, "_", "\\_")
-}
-
-// unique returns slice of unique string occurrences from the source one
-func unique(sl []string) []string {
-	m := make(map[string]struct{})
-	for _, s := range sl {
-		m[s] = struct{}{}
-	}
-	var res []string
-	for s := range m {
-		res = append(res, s)
-	}
-	return res
-}
-
-// remove all excess whitespaces from string
-func removeRedundantWhitespaces(s string) string {
-	return strings.Join(strings.Fields(strings.TrimSpace(s)), " ")
 }

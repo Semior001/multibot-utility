@@ -20,7 +20,7 @@ func TestBoltDB_PutGroup(t *testing.T) {
 	require.NoError(t, err)
 
 	err = svc.db.View(func(tx *bolt.Tx) error {
-		bkt := tx.Bucket([]byte(groupBotBktName))
+		bkt := tx.Bucket([]byte(groupsBktName))
 		assert.NotNil(t, bkt)
 
 		chat := bkt.Bucket([]byte("foo"))
@@ -46,7 +46,7 @@ func TestBoltDB_DeleteUserFromGroup(t *testing.T) {
 
 	users := []string{"@blah", "@blah1", "@blah2"}
 	err := svc.db.Update(func(tx *bolt.Tx) error {
-		bkt := tx.Bucket([]byte(groupBotBktName))
+		bkt := tx.Bucket([]byte(groupsBktName))
 		assert.NotNil(t, bkt)
 
 		chat, err := bkt.CreateBucket([]byte("foo"))
@@ -65,7 +65,7 @@ func TestBoltDB_DeleteUserFromGroup(t *testing.T) {
 	require.NoError(t, err)
 
 	err = svc.db.View(func(tx *bolt.Tx) error {
-		bkt := tx.Bucket([]byte(groupBotBktName))
+		bkt := tx.Bucket([]byte(groupsBktName))
 		assert.NotNil(t, bkt)
 
 		chat := bkt.Bucket([]byte("foo"))
@@ -85,7 +85,7 @@ func TestBoltDB_DeleteUserFromGroup(t *testing.T) {
 
 	err = svc.DeleteUserFromGroup("foo", "@bar", "@blah1")
 	err = svc.db.View(func(tx *bolt.Tx) error {
-		bkt := tx.Bucket([]byte(groupBotBktName))
+		bkt := tx.Bucket([]byte(groupsBktName))
 		assert.NotNil(t, bkt)
 
 		chat := bkt.Bucket([]byte("foo"))
@@ -109,7 +109,7 @@ func TestBoltDB_GetGroup(t *testing.T) {
 
 	users := []string{"@blah", "@blah1", "@blah2"}
 	err := svc.db.Update(func(tx *bolt.Tx) error {
-		bkt := tx.Bucket([]byte(groupBotBktName))
+		bkt := tx.Bucket([]byte(groupsBktName))
 		assert.NotNil(t, bkt)
 
 		chat, err := bkt.CreateBucket([]byte("foo"))
@@ -136,7 +136,7 @@ func TestBoltDB_GetGroups(t *testing.T) {
 
 	users := []string{"@blah", "@blah1", "@blah2"}
 	err := svc.db.Update(func(tx *bolt.Tx) error {
-		bkt := tx.Bucket([]byte(groupBotBktName))
+		bkt := tx.Bucket([]byte(groupsBktName))
 		assert.NotNil(t, bkt)
 
 		chat, err := bkt.CreateBucketIfNotExists([]byte("foo"))
@@ -182,7 +182,7 @@ func TestBoltDB_DeleteGroup(t *testing.T) {
 
 	users := []string{"@blah", "@blah1", "@blah2"}
 	err := svc.db.Update(func(tx *bolt.Tx) error {
-		bkt := tx.Bucket([]byte(groupBotBktName))
+		bkt := tx.Bucket([]byte(groupsBktName))
 		assert.NotNil(t, bkt)
 
 		chat, err := bkt.CreateBucket([]byte("foo"))
@@ -201,7 +201,7 @@ func TestBoltDB_DeleteGroup(t *testing.T) {
 	require.NoError(t, err)
 
 	err = svc.db.View(func(tx *bolt.Tx) error {
-		bkt := tx.Bucket([]byte(groupBotBktName))
+		bkt := tx.Bucket([]byte(groupsBktName))
 		assert.NotNil(t, bkt)
 
 		chat := bkt.Bucket([]byte("foo"))
@@ -219,7 +219,7 @@ func TestBoltDB_AddUser(t *testing.T) {
 
 	users := []string{"@blah", "@blah1", "@blah2"}
 	err := svc.db.Update(func(tx *bolt.Tx) error {
-		bkt := tx.Bucket([]byte(groupBotBktName))
+		bkt := tx.Bucket([]byte(groupsBktName))
 		assert.NotNil(t, bkt)
 
 		chat, err := bkt.CreateBucket([]byte("foo"))
@@ -237,7 +237,7 @@ func TestBoltDB_AddUser(t *testing.T) {
 	err = svc.AddUser("foo", "@bar", "@blah3")
 
 	err = svc.db.View(func(tx *bolt.Tx) error {
-		bkt := tx.Bucket([]byte(groupBotBktName))
+		bkt := tx.Bucket([]byte(groupsBktName))
 		assert.NotNil(t, bkt)
 
 		chat := bkt.Bucket([]byte("foo"))
@@ -264,7 +264,7 @@ func TestBoltDB_FindAliases(t *testing.T) {
 	usersC := []string{"@blahC", "@blah1C", "@blah2C"}
 
 	err := svc.db.Update(func(tx *bolt.Tx) error {
-		bkt := tx.Bucket([]byte(groupBotBktName))
+		bkt := tx.Bucket([]byte(groupsBktName))
 		assert.NotNil(t, bkt)
 
 		chatBkt, err := bkt.CreateBucket([]byte("foo"))
@@ -329,7 +329,7 @@ func TestBoltDB_AddChat(t *testing.T) {
 	require.NoError(t, err)
 
 	err = svc.db.View(func(tx *bolt.Tx) error {
-		bkt := tx.Bucket([]byte(groupBotBktName))
+		bkt := tx.Bucket([]byte(groupsBktName))
 		assert.NotNil(t, bkt)
 
 		chat := bkt.Bucket([]byte("qwerty"))
@@ -340,7 +340,7 @@ func TestBoltDB_AddChat(t *testing.T) {
 	require.NoError(t, err)
 }
 
-func prepareBoltDB(t *testing.T) *BoltDB {
+func prepareBoltDB(t *testing.T) *Bolt {
 	loc, err := ioutil.TempDir("", "test_groups_multibot")
 	require.NoError(t, err, "failed to make temp dir")
 

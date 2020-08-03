@@ -31,7 +31,7 @@ func main() {
 		setupLog(opts.Dbg)
 		err := command.Execute(args)
 		if err != nil {
-			log.Printf("[ERROR] failed to execute command %+v", err)
+			log.Printf("[ERROR] failed to execute command %v", err)
 		}
 		return nil
 	}

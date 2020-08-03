@@ -168,7 +168,7 @@ func (t *TelegramBotCtrl) isUserAdmin(msg *tgbotapi.Message) bool {
 	})
 
 	if err != nil {
-		log.Printf("[WARN] failed to retrieve admins for chat %d: %+v", msg.Chat.ID, err)
+		log.Printf("[WARN] failed to retrieve admins for chat %d: %v", msg.Chat.ID, err)
 		return false
 	}
 
